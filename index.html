@@ -1,0 +1,3798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>THE LAST SECRET – Secrets Never Stay Buried</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================================
+       DESIGN TOKENS & ATMOSPHERIC THEME
+       ========================================================================= */
+    :root {
+      --bg-navy: #070b14;
+      --bg-charcoal: #0d1322;
+      --bg-panel: #11192c;
+      --bg-panel-elevated: #172139;
+      --burgundy-dark: #3b0d1b;
+      --burgundy: #5c162b;
+      --burgundy-bright: #852140;
+      --gold: #d4af37;
+      --gold-light: #f3d27a;
+      --gold-dim: rgba(212, 175, 55, 0.25);
+      --text-main: #eef2f8;
+      --text-muted: #9aa7be;
+      --text-dim: #69768e;
+      --border-subtle: rgba(212, 175, 55, 0.22);
+      --border-strong: rgba(212, 175, 55, 0.55);
+      --success: #2ea073;
+      --warning: #d99b26;
+      --danger: #c93b4b;
+      --font-display: 'Cinzel', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.55);
+      --shadow-glow: 0 0 24px rgba(212, 175, 55, 0.22);
+      --transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100vh;
+      background-color: var(--bg-navy);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      line-height: 1.55;
+      overflow-x: hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    h1, h2, h3, h4, .font-display {
+      font-family: var(--font-display);
+      letter-spacing: 0.04em;
+    }
+
+    button {
+      font-family: var(--font-sans);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: inherit;
+      transition: var(--transition);
+    }
+
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 2px solid var(--gold-light);
+      outline-offset: 2px;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-navy);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(212, 175, 55, 0.3);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(212, 175, 55, 0.55);
+    }
+
+    /* =========================================================================
+       ATMOSPHERIC BACKGROUND CANVAS & VIGNETTE
+       ========================================================================= */
+    #atmosphere-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+      background:
+        radial-gradient(circle at 50% 25%, rgba(92, 22, 43, 0.14), transparent 60%),
+        radial-gradient(circle at 50% 50%, transparent 45%, rgba(3, 5, 10, 0.85) 100%);
+    }
+
+    #app-shell {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* =========================================================================
+       TOP NAVIGATION / PERSISTENT HUD
+       ========================================================================= */
+    .top-hud {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(10, 15, 28, 0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.65rem 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .hud-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .hud-title-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hud-brand-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      line-height: 1.15;
+    }
+
+    .hud-level-badge {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .hud-stats {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .stat-pill {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: 999px;
+      padding: 0.32rem 0.75rem;
+      font-size: 0.78rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--text-main);
+    }
+
+    .stat-pill strong {
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+
+    .hud-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .btn-hud {
+      background: var(--bg-panel-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.42rem 0.72rem;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.38rem;
+      position: relative;
+    }
+
+    .btn-hud:hover {
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.12);
+      transform: translateY(-1px);
+    }
+
+    .btn-hud.active-tab {
+      border-color: var(--gold-light);
+      background: rgba(133, 33, 64, 0.38);
+      color: var(--gold-light);
+    }
+
+    .badge-count {
+      background: var(--burgundy-bright);
+      color: #fff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.05rem 0.38rem;
+      border-radius: 999px;
+    }
+
+    /* =========================================================================
+       BUTTONS & CARDS
+       ========================================================================= */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--burgundy-bright), var(--burgundy));
+      border: 1px solid var(--gold);
+      color: var(--gold-light);
+      font-family: var(--font-display);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.78rem 1.5rem;
+      border-radius: var(--radius-md);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(212, 175, 55, 0.16);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6), 0 0 24px rgba(212, 175, 55, 0.32);
+      background: linear-gradient(135deg, #9d274c, var(--burgundy-bright));
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-gold {
+      background: linear-gradient(135deg, var(--gold-light), var(--gold));
+      color: #141006;
+      font-weight: 700;
+      padding: 0.68rem 1.25rem;
+      border-radius: var(--radius-md);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+    }
+
+    .btn-gold:hover:not(:disabled) {
+      filter: brightness(1.07);
+      transform: translateY(-1px);
+    }
+
+    .btn-gold:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--bg-panel-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+      font-weight: 500;
+      padding: 0.62rem 1.1rem;
+      border-radius: var(--radius-md);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      border-color: var(--gold);
+      color: var(--gold-light);
+    }
+
+    .btn-secondary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .panel-card {
+      background: linear-gradient(180deg, rgba(17, 25, 44, 0.94), rgba(11, 17, 31, 0.96));
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+    }
+
+    /* =========================================================================
+       TITLE / LANDING SCREEN
+       ========================================================================= */
+    .title-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.25rem 3.5rem;
+      max-width: 1120px;
+      margin: 0 auto;
+      width: 100%;
+      animation: fadeInUp 0.65s ease;
+    }
+
+    .crest-hero {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .crest-kicker {
+      display: inline-block;
+      font-size: 0.78rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(133, 33, 64, 0.26);
+      border: 1px solid var(--border-subtle);
+      padding: 0.35rem 1rem;
+      border-radius: 999px;
+      margin-bottom: 0.9rem;
+    }
+
+    .main-game-title {
+      font-size: clamp(2.1rem, 5.5vw, 3.8rem);
+      font-weight: 800;
+      color: var(--gold-light);
+      text-shadow: 0 4px 28px rgba(212, 175, 55, 0.25), 0 2px 6px rgba(0, 0, 0, 0.9);
+      line-height: 1.12;
+    }
+
+    .main-game-subtitle {
+      font-family: var(--font-display);
+      font-size: clamp(0.95rem, 2.2vw, 1.3rem);
+      color: #e6b8c6;
+      margin-top: 0.45rem;
+      letter-spacing: 0.12em;
+    }
+
+    .premise-box {
+      max-width: 780px;
+      margin: 1.25rem auto 0;
+      background: rgba(13, 19, 34, 0.85);
+      border: 1px solid var(--border-subtle);
+      border-left: 4px solid var(--gold);
+      border-radius: var(--radius-md);
+      padding: 1.15rem 1.35rem;
+      text-align: left;
+      color: var(--text-main);
+      font-size: 0.96rem;
+    }
+
+    .setup-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 1.25rem;
+      width: 100%;
+      margin-bottom: 1.75rem;
+    }
+
+    .difficulty-option {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      width: 100%;
+    }
+
+    .difficulty-option.selected {
+      border-color: var(--gold-light);
+      background: rgba(133, 33, 64, 0.28);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .difficulty-name {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--gold-light);
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .difficulty-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .cast-strip {
+      width: 100%;
+      margin-top: 1.5rem;
+    }
+
+    .cast-strip-title {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 0.75rem;
+      text-align: center;
+    }
+
+    .cast-grid-8 {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .cast-mini-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.6rem;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .cast-mini-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+
+    .cast-mini-name {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--text-main);
+      margin-top: 0.35rem;
+    }
+
+    .cast-mini-role {
+      font-size: 0.7rem;
+      color: var(--gold);
+    }
+
+    /* =========================================================================
+       MAIN INVESTIGATION WORKSPACE
+       ========================================================================= */
+    .game-workspace {
+      flex: 1;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .chapter-banner {
+      background: linear-gradient(90deg, rgba(92, 22, 43, 0.55), rgba(17, 25, 44, 0.95) 45%, rgba(17, 25, 44, 0.95));
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 1.15rem 1.4rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      animation: fadeInUp 0.4s ease;
+    }
+
+    .chapter-kicker {
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .chapter-heading {
+      font-size: clamp(1.3rem, 2.8vw, 1.9rem);
+      color: var(--gold-light);
+      margin-top: 0.15rem;
+    }
+
+    .chapter-objective {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    .level-step-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .step-pill {
+      padding: 0.42rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+
+    .step-pill.active {
+      background: var(--gold);
+      color: #141006;
+      border-color: var(--gold-light);
+    }
+
+    .step-pill.completed {
+      border-color: var(--success);
+      color: #7ee2b8;
+    }
+
+    /* =========================================================================
+       CRIME SCENE EXPLORER (LEVEL 1)
+       ========================================================================= */
+    .scene-container {
+      position: relative;
+      width: 100%;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--border-strong);
+      background: #080d18;
+      box-shadow: var(--shadow-card);
+      user-select: none;
+      touch-action: none;
+    }
+
+    .scene-viewport {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      min-height: 300px;
+      overflow: hidden;
+    }
+
+    .scene-zoom-layer {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-origin: center center;
+      transition: transform 0.25s ease-out;
+    }
+
+    .scene-zoom-layer svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .hotspot-btn {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(212, 175, 55, 0.22);
+      border: 2px solid var(--gold-light);
+      box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.65);
+      animation: hotspotPulse 2.2s infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 6;
+    }
+
+    .hotspot-btn:hover {
+      background: rgba(133, 33, 64, 0.75);
+      transform: translate(-50%, -50%) scale(1.12);
+    }
+
+    .hotspot-btn.inspected {
+      border-color: #4ade80;
+      background: rgba(46, 160, 115, 0.28);
+      animation: none;
+    }
+
+    .hotspot-core {
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--gold-light);
+    }
+
+    .hotspot-btn.inspected .hotspot-core {
+      background: #4ade80;
+    }
+
+    .hotspot-tag {
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(7, 11, 20, 0.92);
+      border: 1px solid var(--border-subtle);
+      color: var(--gold-light);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.14rem 0.5rem;
+      border-radius: 999px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .scene-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    /* =========================================================================
+       CHARACTER GRID & DIALOGUE SYSTEM
+       ========================================================================= */
+    .suspects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.9rem;
+    }
+
+    .suspect-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      text-align: left;
+      transition: var(--transition);
+    }
+
+    .suspect-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+    }
+
+    .suspect-card.selected {
+      border-color: var(--gold-light);
+      background: rgba(133, 33, 64, 0.25);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .suspect-header {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .portrait-frame {
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      background: radial-gradient(circle at 35% 25%, #233252, #0b101d);
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .portrait-frame.large {
+      width: 112px;
+      height: 112px;
+      border-width: 3px;
+    }
+
+    .dialogue-box {
+      background: linear-gradient(180deg, rgba(16, 24, 43, 0.98), rgba(9, 14, 26, 0.99));
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .dialogue-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .dialogue-speech {
+      background: rgba(7, 11, 20, 0.75);
+      border-left: 3px solid var(--gold);
+      border-radius: var(--radius-sm);
+      padding: 0.95rem 1.1rem;
+      font-size: 0.98rem;
+      min-height: 76px;
+      color: var(--text-main);
+    }
+
+    .dialogue-choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+
+    .choice-btn {
+      background: var(--bg-panel-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.58rem 0.9rem;
+      font-size: 0.84rem;
+      text-align: left;
+      color: var(--gold-light);
+    }
+
+    .choice-btn:hover {
+      border-color: var(--gold-light);
+      background: rgba(133, 33, 64, 0.34);
+    }
+
+    /* =========================================================================
+       INTERACTIVE FLOOR MAP & TIMELINE
+       ========================================================================= */
+    .floor-map-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .room-zone {
+      background: rgba(12, 19, 34, 0.9);
+      border: 1px dashed rgba(212, 175, 55, 0.35);
+      border-radius: var(--radius-md);
+      padding: 0.85rem;
+      min-height: 132px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: var(--transition);
+    }
+
+    .room-zone.drag-over {
+      border-style: solid;
+      border-color: var(--gold-light);
+      background: rgba(212, 175, 55, 0.12);
+    }
+
+    .room-title {
+      font-family: var(--font-display);
+      font-size: 0.86rem;
+      color: var(--gold-light);
+      margin-bottom: 0.25rem;
+    }
+
+    .room-time {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .placed-token {
+      background: var(--bg-panel-elevated);
+      border: 1px solid var(--gold);
+      border-radius: 999px;
+      padding: 0.24rem 0.65rem;
+      font-size: 0.76rem;
+      color: var(--text-main);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin: 0.2rem;
+    }
+
+    .timeline-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .timeline-item {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 0.8rem 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .timeline-item[draggable="true"] {
+      cursor: grab;
+    }
+
+    .timeline-item.dragging {
+      opacity: 0.5;
+      border-color: var(--gold-light);
+    }
+
+    /* =========================================================================
+       DRAWERS & MODALS (EVIDENCE, DETECTIVE BOARD, NOTEBOOK, HINTS)
+       ========================================================================= */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 6, 12, 0.76);
+      backdrop-filter: blur(6px);
+      z-index: 60;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .drawer-panel {
+      width: min(680px, 100vw);
+      height: 100vh;
+      background: var(--bg-charcoal);
+      border-left: 1px solid var(--border-strong);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideInRight 0.28s ease;
+    }
+
+    .drawer-panel.wide {
+      width: min(980px, 100vw);
+    }
+
+    .drawer-header {
+      padding: 1rem 1.25rem;
+      background: var(--bg-panel);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 6, 12, 0.82);
+      backdrop-filter: blur(6px);
+      z-index: 75;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      max-width: 640px;
+      width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 1.35rem;
+      box-shadow: var(--shadow-card);
+      animation: fadeInUp 0.25s ease;
+    }
+
+    /* Living Detective Board */
+    .board-canvas-wrap {
+      position: relative;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.05), transparent 70%),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 28px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 28px),
+        #090e1a;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      min-height: 430px;
+      overflow: hidden;
+    }
+
+    .board-strings-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .board-columns {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .board-node {
+      background: var(--bg-panel-elevated);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 0.65rem 0.75rem;
+      margin-bottom: 0.55rem;
+      cursor: pointer;
+      font-size: 0.82rem;
+      transition: var(--transition);
+    }
+
+    .board-node:hover {
+      border-color: var(--gold);
+    }
+
+    .board-node.link-source {
+      border-color: var(--gold-light);
+      box-shadow: 0 0 14px rgba(243, 210, 122, 0.45);
+      background: rgba(133, 33, 64, 0.35);
+    }
+
+    /* Toast / Feedback Banner */
+    .toast-banner {
+      position: fixed;
+      bottom: 1.25rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 90;
+      background: linear-gradient(135deg, var(--bg-panel-elevated), #1d1222);
+      border: 1px solid var(--gold);
+      color: var(--text-main);
+      padding: 0.7rem 1.2rem;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75);
+      font-size: 0.88rem;
+      max-width: min(92vw, 560px);
+      text-align: center;
+      animation: fadeInUp 0.25s ease;
+    }
+
+    /* Certificate Print Styling */
+    .certificate-box {
+      background: linear-gradient(160deg, #141d33, #0c1220);
+      border: 3px double var(--gold);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(212, 175, 55, 0.2);
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .printable-cert, .printable-cert * {
+        visibility: visible;
+      }
+      .printable-cert {
+        position: fixed;
+        inset: 0;
+        background: #fff !important;
+        color: #111 !important;
+        padding: 2rem;
+      }
+    }
+
+    /* =========================================================================
+       ANIMATIONS
+       ========================================================================= */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+      }
+      to {
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes hotspotPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(243, 210, 122, 0.65);
+      }
+      70% {
+        box-shadow: 0 0 0 14px rgba(243, 210, 122, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(243, 210, 122, 0);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .top-hud {
+        padding: 0.55rem 0.75rem;
+      }
+      .game-workspace {
+        padding: 0.8rem;
+      }
+      .scene-viewport {
+        aspect-ratio: 4 / 3;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Atmospheric Rain & Mist Canvas -->
+  <canvas id="atmosphere-canvas" aria-hidden="true"></canvas>
+  <div class="ambient-vignette" aria-hidden="true"></div>
+
+  <!-- Root Application Shell -->
+  <div id="app-shell"></div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Drawer / Modal Container -->
+  <div id="overlay-container"></div>
+
+  <script>
+    /* =======================================================================
+       1. STORY BIBLE & CANONICAL GAME DATA
+       ======================================================================= */
+    const STORY_BIBLE = {
+      title: "THE LAST SECRET",
+      subtitle: "Secrets Never Stay Buried",
+      academy: "St. Jude Hillcrest Academy",
+      setting: "Misty Hill Station — Autumn Cultural Festival (Day 1)",
+      victim: {
+        name: "Ms. Eleanor Vance",
+        age: 54,
+        role: "Senior Mentor & Archival Literature Coordinator",
+        timeOfDeath: "Approx. 05:45 AM (Discovered at 06:20 AM in the Old Library)",
+        causeSummary: "Fatal cardiac event triggered by bitter night-tea laced with wild monkshood (aconite) extract from the botany glasshouse, paired with a staged fall near the tall library window/ladder.",
+        trueSecret: "Ms. Eleanor discovered that a tech consultancy tied to Tara Sen's family had secretly leaked confidential scholarship & endowment audit logs, and she scheduled a dawn meeting to hand the audit ledger to the board before the festival awards."
+      },
+      murdererId: "tara",
+      motiveSummary: "Protect Tara's full scholarship and her family's tech firm from an impending board scandal over leaked festival scholarship & endowment audit files.",
+      methodSummary: "Slipped wild monkshood tincture into Ms. Eleanor's late-evening/pre-dawn herbal tea, staged her collapse near the tall library window, and altered the library clock/alarm sync log by 35 minutes to misalign alibis.",
+      twistWithinTwist: "Tara didn't just hide her own trail—she subtly guided which clues surfaced and encouraged early suspicion toward Riya's argument and Meera's herbs while keeping the scholarship endowment audit ledger out of sight until the truth closed in.",
+      difficulties: {
+        detective: {
+          id: "detective",
+          name: "Detective",
+          desc: "Detailed investigative hints, clear guidance prompts, and generous deduction points.",
+          hintBonus: 0,
+          scoreMultiplier: 1.0
+        },
+        investigator: {
+          id: "investigator",
+          name: "Investigator",
+          desc: "Balanced mystery challenge with subtle hints and standard deduction scoring.",
+          hintPenalty: 35,
+          scoreMultiplier: 1.2
+        },
+        master: {
+          id: "master",
+          name: "Master Detective",
+          desc: "Minimal hints, sharper timeline scrutiny, and maximum score multiplier.",
+          hintPenalty: 75,
+          scoreMultiplier: 1.5
+        }
+      }
+    };
+
+    const CHARACTERS = [
+      {
+        id: "aarohi",
+        name: "Aarohi Verma",
+        age: 16,
+        archetype: "The Natural Leader",
+        hairColor: "#1b1626",
+        skinColor: "#e6b08a",
+        outfitColor: "#1d3557",
+        accentColor: "#d4af37",
+        hairStyle: "braid",
+        accessory: "compass",
+        personality: "Confident, composed, protective of her friends, and natural at organizing clues.",
+        background: "Daughter of a retired civil engineer; head student coordinator for the Autumn Cultural Festival.",
+        relationshipToVictim: "Trusted student prefect who helped Ms. Eleanor catalog rare festival programs.",
+        secret: "Covered up an accidental stage-lighting fuse trip during late dress rehearsal so the drama club wouldn't lose stage time.",
+        alibi: "East Hall checking stage lighting cues from 05:25 AM to 06:05 AM.",
+        alibiRoom: "east_hall",
+        isGuilty: false,
+        introLine: "Ms. Eleanor was the heart of St. Jude Hillcrest. If something happened inside the Old Library, we need calm heads and real facts—not panic.",
+        pressLine: "I won't lie: I bypassed a tripped lighting breaker in East Hall last night to keep rehearsal moving. That's a rule breach, not a crime.",
+        lateLine: "Now that we see the scholarship audit angle, I realize how carefully someone kept us looking at stage drama and garden herbs."
+      },
+      {
+        id: "meera",
+        name: "Meera Nair",
+        age: 15,
+        archetype: "The Science Enthusiast",
+        hairColor: "#16131c",
+        skinColor: "#c6865c",
+        outfitColor: "#3b5e47",
+        accentColor: "#a7d397",
+        hairStyle: "bun_glasses",
+        accessory: "glasses",
+        personality: "Analytical, curious, literal-minded, and fascinated by botanical chemistry.",
+        background: "Scholarship science fellow from Kochi who spends evenings cataloging mountain flora.",
+        relationshipToVictim: "Ms. Eleanor encouraged Meera's archival herbarium index and lent her antique botanical plates.",
+        secret: "Brewed unauthorized valerian and wild mountain herb infusions in the glasshouse after curfew.",
+        alibi: "In the Glasshouse recording dawn humidity and plant notes from 05:15 AM to 06:00 AM.",
+        alibiRoom: "glasshouse",
+        isGuilty: false,
+        introLine: "A sudden cardiac event near a rain-slicked window sounds like an accident on paper—until you notice the bitter herbal residue in the cup.",
+        pressLine: "Yes, I worked with wild herbs in the glasshouse after lights-out! Monkshood is toxic in concentrated extracts—someone who knew what to look for could misuse it.",
+        lateLine: "I didn't put aconite in Ms. Eleanor's cup, and the clock shift proves the timeline was doctored while I was logging temperatures."
+      },
+      {
+        id: "riya",
+        name: "Riya Kulkarni",
+        age: 15,
+        archetype: "The Artist",
+        hairColor: "#281814",
+        skinColor: "#d89b72",
+        outfitColor: "#8c2d27",
+        accentColor: "#f2a679",
+        hairStyle: "bob",
+        accessory: "scarf",
+        personality: "Expressive, observant of visual details, quick-tempered when cornered, deeply loyal.",
+        background: "Painter from Pune designing the main festival backdrop mural at St. Jude Hillcrest.",
+        relationshipToVictim: "Had a sharp disagreement with Ms. Eleanor yesterday evening over relocating a mural panel.",
+        secret: "Borrowed the Old Library's brass side-key earlier in the week to sketch under the stained glass at dusk.",
+        alibi: "In the Art Studio washing pigment brushes after 05:40 AM—hesitant to mention walking past the library corridor.",
+        alibiRoom: "art_studio",
+        isGuilty: false,
+        introLine: "I lost my temper with Ms. Eleanor yesterday afternoon, alright? Anyone who knows me knows I yell when I'm frustrated—I don't hurt people.",
+        pressLine: "Fine! I had that brass side-key for sketching, and I walked past the library wing around 05:45. The door was already ajar, and I didn't go inside.",
+        lateLine: "Someone wanted my temper and my old key to look like the whole story. Look closer at who controlled the digital logs."
+      },
+      {
+        id: "tara",
+        name: "Tara Sen",
+        age: 15,
+        archetype: "The Tech Expert",
+        hairColor: "#141622",
+        skinColor: "#e2ac87",
+        outfitColor: "#242c42",
+        accentColor: "#7dd3fc",
+        hairStyle: "asym_bob",
+        accessory: "smartwatch",
+        personality: "Warm, sharp-witted, calm under pressure, and eager to organize digital clues.",
+        background: "Tech-savvy student whose family runs a software consultancy that partnered on academy portals.",
+        relationshipToVictim: "Polite and helpful around digital archives—yet secretly terrified Ms. Eleanor would expose a scholarship data leak.",
+        secret: "Accessed restricted endowment audit folders on the academy server and tampered with the library's digital clock/alarm sync.",
+        alibi: "Claims she calibrated festival AV projectors in the Server/AV Room from 05:00 AM to 06:15 AM.",
+        alibiRoom: "av_room",
+        isGuilty: true,
+        introLine: "It's surreal walking into the Old Library like this. If there's anything unusual in the clock sync or CCTV logs, I can help us trace it.",
+        pressLine: "Calibration takes focus—sometimes you step away from the console for half an hour while a render runs. Why would anyone doubt the AV room?",
+        lateLine: "Wait... you really connected the scholarship audit ledger to the clock offset? Even so, don't jump to conclusions without rock-solid proof."
+      },
+      {
+        id: "ananya",
+        name: "Ananya Deshmukh",
+        age: 14,
+        archetype: "The Quiet Observer",
+        hairColor: "#1c1924",
+        skinColor: "#dfb08e",
+        outfitColor: "#4a4e69",
+        accentColor: "#e2cfc3",
+        hairStyle: "twins",
+        accessory: "notebook",
+        personality: "Soft-spoken, perceptive, cautious, and attentive to small footsteps and shadows.",
+        background: "Bookish fourteenth-year student from Shimla who loves hill-station fog and quiet corners.",
+        relationshipToVictim: "Ms. Eleanor gently encouraged Ananya's poetry chapbook and let her read in the alcoves.",
+        secret: "Saw a figure slip along the West Cloister before dawn and stayed quiet to avoid dragging a friend into trouble.",
+        alibi: "Sitting by the Dormitory window reading from 05:00 AM onward.",
+        alibiRoom: "dormitory",
+        isGuilty: false,
+        introLine: "I don't talk much... but I noticed the west corridor light flickered twice before dawn while the rain hit the glass.",
+        pressLine: "I stayed quiet because I didn't want to accuse the wrong person in our circle. Guessing hurts everyone.",
+        lateLine: "The person in the cloister moved with purpose—not panic. They knew the building's blind spots."
+      },
+      {
+        id: "zoya",
+        name: "Zoya Merchant",
+        age: 16,
+        archetype: "The Social Butterfly",
+        hairColor: "#1f141a",
+        skinColor: "#d99b78",
+        outfitColor: "#5c162b",
+        accentColor: "#f3d27a",
+        hairStyle: "waves_ribbon",
+        accessory: "bangles",
+        personality: "Charismatic, observant of social alliances, expressive, and surprisingly perceptive.",
+        background: "From Mumbai; manages cultural guest lists, invitations, and hospitality pairings.",
+        relationshipToVictim: "Ms. Eleanor teased Zoya fondly about her endless lists while trusting her with VIP seating.",
+        secret: "Swapped two festival seating passes and knew about a quiet scholarship transfer between families.",
+        alibi: "Helping check early morning catering and guest seating in the Dining Hall around 05:30 AM.",
+        alibiRoom: "dining_hall",
+        isGuilty: false,
+        introLine: "Everyone tells Zoya everything eventually—except nobody expected a tragedy on Opening Morning of the festival.",
+        pressLine: "Okay, I rearranged two guest invitations so two rivals wouldn't sit front-row! Harmless drama compared to what's in that library.",
+        lateLine: "Funny how the person who always had an answer for every tech glitch suddenly has a 35-minute blank spot."
+      },
+      {
+        id: "kavya",
+        name: "Kavya Iyer",
+        age: 16,
+        archetype: "The Competitive Student",
+        hairColor: "#17141d",
+        skinColor: "#c98963",
+        outfitColor: "#6d1a36",
+        accentColor: "#f8fafc",
+        hairStyle: "ponytail",
+        accessory: "stopwatch",
+        personality: "Driven, sharp-tongued when stressed, perfectionist, and fiercely protective of her academic record.",
+        background: "Debate captain and essay finalist aiming for top honors at St. Jude Hillcrest.",
+        relationshipToVictim: "Ms. Eleanor questioned Kavya's citation notes on an archival festival essay two days ago.",
+        secret: "Feared Ms. Eleanor would flag uncredited secondary notes in her debate dossier right before judging.",
+        alibi: "Rehearsing her opening festival address in the Recital Hall from 05:15 AM to 06:00 AM.",
+        alibiRoom: "recital_hall",
+        isGuilty: false,
+        introLine: "I work harder than anyone here, and I don't need melodrama. If someone tampered with the library timeline, find the exact timestamp.",
+        pressLine: "Yes, Ms. Eleanor wanted tighter citations on my essay! Annoying? Yes. A reason to end her life? Don't be ridiculous.",
+        lateLine: "A true detective builds a chain of verified facts—motive, opportunity, contradiction, and physical proof."
+      },
+      {
+        id: "nandini",
+        name: "Nandini Rao",
+        age: 15,
+        archetype: "The Misdirected Suspect",
+        hairColor: "#1b1622",
+        skinColor: "#d69870",
+        outfitColor: "#2b4162",
+        accentColor: "#e9c46a",
+        hairStyle: "half_up",
+        accessory: "locket",
+        personality: "Gentle, sincere, quietly brave, and deeply attached to family history.",
+        background: "From Mysuru; her family knew Ms. Eleanor's late sister years ago.",
+        relationshipToVictim: "Shared a quiet, confidential bond with Ms. Eleanor regarding a family letter.",
+        secret: "Met Ms. Eleanor privately about an old family letter—which made a doctored photo in Level 5 look incriminating.",
+        alibi: "In the West Cloister / corridor near the archive steps before dawn, trying to keep her family letter private.",
+        alibiRoom: "west_cloister",
+        isGuilty: false,
+        introLine: "Ms. Eleanor promised to keep my family letter confidential... seeing that photo twisted to make me look guilty broke my heart.",
+        pressLine: "I was near the west archive passage, not inside the library at the time of the tea. Someone edited that image to frame me.",
+        lateLine: "I'm glad you checked the metadata instead of falling for the false trail."
+      }
+    ];
+
+    const EVIDENCE_CATALOG = [
+      {
+        id: "ev_desk_cup",
+        title: "Bitter Herbal Tea Cup",
+        category: "Physical",
+        level: 1,
+        summary: "A porcelain cup on Ms. Eleanor's mahogany desk with dark botanical sediment and a faint bitter alkaloid scent.",
+        detail: "Unlike her usual sweet chamomile, this infusion contains wild mountain herb residue matching plant compounds studied in the glasshouse—yet traces of digital access logs point to who engineered the timing."
+      },
+      {
+        id: "ev_broken_clock",
+        title: "Stopped Brass Desk Clock (05:42)",
+        category: "Physical",
+        level: 1,
+        summary: "An antique desk clock knocked onto the rug with hands frozen at 05:42 AM.",
+        detail: "The pendulum stopped on impact, while the library's wall/digital system clock was remotely nudged forward by 35 minutes."
+      },
+      {
+        id: "ev_window_latch",
+        title: "Rain-Lashed Mullion Window",
+        category: "Physical",
+        level: 1,
+        summary: "High library casement window unlatched with damp sill marks, staged to suggest a slip during the storm.",
+        detail: "Rain blew inward slightly, but the heavy ladder beside it shows no panicked scramble—consistent with a staged fall after weakness set in."
+      },
+      {
+        id: "ev_audit_bookmark",
+        title: "Torn Scholarship Audit Slip",
+        category: "Documents",
+        level: 1,
+        summary: "A torn slip of archival paper wedged inside a reference volume mentioning 'Endowment Leak – Restricted Portal'.",
+        detail: "Links Ms. Eleanor's final evening research directly to confidential scholarship and endowment records rather than art murals or debate essays."
+      },
+      {
+        id: "ev_missing_photo",
+        title: "Empty Silver Frame (Missing Photo)",
+        category: "Physical",
+        level: 1,
+        summary: "A silver frame on the side table whose photograph was removed, leaving a clean dust outline.",
+        detail: "Whoever took the photo wanted to hide a connection or later repurpose imagery during the investigation."
+      },
+      {
+        id: "ev_alibi_map_report",
+        title: "Dawn Alibi & Floor Grid Log",
+        category: "Testimony",
+        level: 2,
+        summary: "Cross-check of all eight girls' dawn locations against the academy floor plan.",
+        detail: "Riya's hesitant corridor mention and Tara's 35-minute AV/Server Room gap stand out when mapped against the Old Library's east and west approaches."
+      },
+      {
+        id: "ev_hidden_diary",
+        title: "Ms. Eleanor's Concealed Leather Diary",
+        category: "Documents",
+        level: 3,
+        summary: "Found behind a loose false-back panel in the reference shelf, locked with a simple letter-shift cipher.",
+        detail: "Records Ms. Eleanor's private notes on students' secrets—including Riya's mural dispute, Kavya's essay citations, and an urgent warning about an external tech portal breach."
+      },
+      {
+        id: "ev_decoded_cipher",
+        title: "Decoded Diary Cipher Entry",
+        category: "Documents",
+        level: 3,
+        summary: "Caesar-shifted note reading: 'PORTAL BREACH FOUND — SCHOLARSHIP LEDGER COPIED — SPEAK AT DAWN'.",
+        detail: "Confirms Ms. Eleanor uncovered unauthorized access to scholarship audit data and planned to confront the source at dawn."
+      },
+      {
+        id: "ev_cctv_sync",
+        title: "Server & Clock Sync Discrepancy",
+        category: "Digital",
+        level: 4,
+        summary: "System log showing the library/corridor time-sync offset shifted by +35 minutes at 05:12 AM from the AV/Server terminal.",
+        detail: "Tara Sen claimed continuous AV calibration from 05:00–06:15 AM, yet the terminal executed a clock-sync edit and left a 35-minute unlogged window."
+      },
+      {
+        id: "ev_brass_key_trail",
+        title: "Library Brass Key & Access Log",
+        category: "Physical",
+        level: 4,
+        summary: "Riya's borrowed brass key was returned to the hook before dawn, while the electronic inner lock log showed a quiet override.",
+        detail: "Proves Riya's key wasn't the sole way in and that digital/building access was manipulated."
+      },
+      {
+        id: "ev_doctored_photo",
+        title: "Altered Cloister Photograph",
+        category: "Digital",
+        level: 5,
+        summary: "A cropped, contrast-spliced image purporting to show Nandini exiting the library right after the incident.",
+        detail: "Pixel edge artifacts and timestamp metadata show the image was composite-edited to frame Nandini over her secret family-letter meeting."
+      },
+      {
+        id: "ev_planted_note",
+        title: "Suspicious Late-Night Message",
+        category: "Digital",
+        level: 5,
+        summary: "An anonymous draft message left on a shared tablet pointing fingers at herbal tea experiments.",
+        detail: "Designed to steer suspicion toward Meera's botany notes while obscuring who accessed the endowment server."
+      },
+      {
+        id: "ev_scholarship_memo",
+        title: "Scholarship Audit & Consultancy File",
+        category: "Documents",
+        level: 6,
+        summary: "Archived memo showing Ms. Eleanor flagged an unauthorized query from a tech firm linked to Tara Sen's family.",
+        detail: "Establishes Tara's direct, high-stakes motive: exposing the breach meant losing her scholarship and triggering a board investigation."
+      },
+      {
+        id: "ev_clue_curation_log",
+        title: "Clue-Pacing & Red Herring Pattern",
+        category: "Digital",
+        level: 7,
+        summary: "Analysis of how certain hints and red herrings surfaced in sequence during the search.",
+        detail: "Exposes the twist within the twist: Tara didn't merely hide—she timed which clues appeared early to keep friends chasing murals and herbs before the audit ledger surfaced."
+      }
+    ];
+
+    const ROOMS = [
+      { id: "old_library", name: "Old Library", time: "Crime Scene ~05:45 AM" },
+      { id: "av_room", name: "Server & AV Room", time: "05:00–06:15 AM" },
+      { id: "glasshouse", name: "Botany Glasshouse", time: "05:15–06:00 AM" },
+      { id: "art_studio", name: "Art Studio & Corridor", time: "After 05:40 AM" },
+      { id: "east_hall", name: "East Stage Hall", time: "05:25–06:05 AM" },
+      { id: "dining_hall", name: "Dining Hall", time: "Around 05:30 AM" },
+      { id: "recital_hall", name: "Recital Hall", time: "05:15–06:00 AM" },
+      { id: "dormitory", name: "Dormitory / West Cloister", time: "Before Dawn" }
+    ];
+
+    const LEVEL_META = [
+      { num: 1, title: "The Discovery", objective: "Inspect 5 clues in the Old Library, hold initial interviews, and identify 3 suspicious details." },
+      { num: 2, title: "Eight Stories, Eight Alibis", objective: "Question all 8 girls, map their dawn locations on the academy floor grid, and spot 2 inconsistent alibis." },
+      { num: 3, title: "Secrets in the Diary", objective: "Uncover the concealed diary, decode the secret message, and identify 3 true character secrets." },
+      { num: 4, title: "The Night of the Incident", objective: "Examine CCTV/clock sync logs and key evidence, then order 6 events chronologically." },
+      { num: 5, title: "The False Trail", objective: "Separate authentic clues from planted/doctored evidence meant to frame an innocent friend." },
+      { num: 6, title: "The Secret Connection", objective: "Connect Ms. Eleanor's audit discovery to Tara's motive and flag statements that no longer hold up." },
+      { num: 7, title: "The Final Confrontation", objective: "Confront the group in the Common Room, uncover the clue-curation twist, and prove Tara's guilt with 4 evidence pillars." },
+      { num: 8, title: "The Last Secret", objective: "Witness the full confrontation, complete breakdown of truth vs. red herrings, epilogues, and your certificate." }
+    ];
+
+    /* =======================================================================
+       2. WEB AUDIO SOUND ENGINE (OPTIONAL, INTERACTION-GATED)
+       ======================================================================= */
+    const SoundEngine = (() => {
+      let ctx = null;
+      let masterGain = null;
+      let droneGain = null;
+      let rainGain = null;
+      let initialized = false;
+
+      function ensureContext() {
+        if (initialized) return;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        ctx = new AudioCtx();
+        masterGain = ctx.createGain();
+        masterGain.gain.value = state.settings.muted ? 0 : state.settings.volume;
+        masterGain.connect(ctx.destination);
+
+        // Subtle suspenseful low drone
+        droneGain = ctx.createGain();
+        droneGain.gain.value = state.settings.musicEnabled ? 0.09 : 0;
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const filter = ctx.createBiquadFilter();
+        osc1.type = "sine";
+        osc2.type = "triangle";
+        osc1.frequency.value = 65.41; // C2
+        osc2.frequency.value = 98.0;  // G2
+        filter.type = "lowpass";
+        filter.frequency.value = 190;
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(droneGain);
+        droneGain.connect(masterGain);
+        osc1.start();
+        osc2.start();
+
+        // Gentle filtered noise for hill-station rain
+        const bufferSize = ctx.sampleRate * 2;
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        let lastOut = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          output[i] = (lastOut + 0.02 * white) / 1.02;
+          lastOut = output[i];
+          output[i] *= 1.6;
+        }
+        const whiteNoise = ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+
+        const rainFilter = ctx.createBiquadFilter();
+        rainFilter.type = "bandpass";
+        rainFilter.frequency.value = 950;
+        rainFilter.Q.value = 0.65;
+
+        rainGain = ctx.createGain();
+        rainGain.gain.value = state.settings.ambienceEnabled ? 0.08 : 0;
+
+        whiteNoise.connect(rainFilter);
+        rainFilter.connect(rainGain);
+        rainGain.connect(masterGain);
+        whiteNoise.start();
+
+        initialized = true;
+      }
+
+      function unlockAndSync() {
+        ensureContext();
+        if (ctx && ctx.state === "suspended") {
+          ctx.resume().catch(() => {});
+        }
+        syncSettings();
+      }
+
+      function syncSettings() {
+        if (!ctx || !masterGain) return;
+        masterGain.gain.setTargetAtTime(
+          state.settings.muted ? 0 : state.settings.volume,
+          ctx.currentTime,
+          0.05
+        );
+        if (droneGain) {
+          droneGain.gain.setTargetAtTime(
+            state.settings.musicEnabled ? 0.09 : 0,
+            ctx.currentTime,
+            0.15
+          );
+        }
+        if (rainGain) {
+          rainGain.gain.setTargetAtTime(
+            state.settings.ambienceEnabled ? 0.08 : 0,
+            ctx.currentTime,
+            0.15
+          );
+        }
+      }
+
+      function playTone(freq, duration, type = "sine", peak = 0.14, delay = 0) {
+        if (!ctx || !masterGain || state.settings.muted) return;
+        const now = ctx.currentTime + delay;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(peak, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+        osc.connect(gain);
+        gain.connect(masterGain);
+        osc.start(now);
+        osc.stop(now + duration + 0.02);
+      }
+
+      return {
+        unlockAndSync,
+        syncSettings,
+        chime() {
+          unlockAndSync();
+          playTone(587.33, 0.25, "sine", 0.12, 0);
+          playTone(880, 0.35, "sine", 0.1, 0.09);
+        },
+        pageTurn() {
+          unlockAndSync();
+          playTone(220, 0.09, "triangle", 0.08, 0);
+          playTone(310, 0.08, "sine", 0.06, 0.04);
+        },
+        footstep() {
+          unlockAndSync();
+          playTone(110, 0.08, "sine", 0.14, 0);
+        },
+        doorCreak() {
+          unlockAndSync();
+          playTone(145, 0.32, "sawtooth", 0.05, 0);
+          playTone(122, 0.35, "triangle", 0.06, 0.12);
+        },
+        thunder() {
+          unlockAndSync();
+          playTone(55, 0.85, "sawtooth", 0.11, 0);
+          playTone(42, 1.1, "sine", 0.15, 0.15);
+        },
+        dramaSwell() {
+          unlockAndSync();
+          playTone(196, 0.7, "sawtooth", 0.08, 0);
+          playTone(233.08, 0.7, "triangle", 0.08, 0.08);
+          playTone(293.66, 0.9, "sine", 0.1, 0.16);
+        }
+      };
+    })();
+
+    /* =======================================================================
+       3. CANVAS RAIN & MIST PARTICLE SYSTEM
+       ======================================================================= */
+    (() => {
+      const canvas = document.getElementById("atmosphere-canvas");
+      const c = canvas.getContext("2d");
+      let drops = [];
+      let mistPuffs = [];
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const count = Math.min(130, Math.floor((canvas.width * canvas.height) / 14000));
+        drops = Array.from({ length: count }, () => ({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          len: 10 + Math.random() * 14,
+          speed: 6 + Math.random() * 7,
+          drift: -1.6 - Math.random() * 1.2,
+          alpha: 0.12 + Math.random() * 0.22
+        }));
+        mistPuffs = Array.from({ length: 8 }, (_, i) => ({
+          x: (i / 8) * canvas.width,
+          y: canvas.height * (0.2 + (i % 4) * 0.2),
+          r: 140 + Math.random() * 120,
+          vx: 0.18 + Math.random() * 0.25,
+          alpha: 0.025 + Math.random() * 0.025
+        }));
+      }
+
+      function tick() {
+        c.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Mist layers
+        for (const m of mistPuffs) {
+          m.x += m.vx;
+          if (m.x - m.r > canvas.width) m.x = -m.r;
+          const grad = c.createRadialGradient(m.x, m.y, 10, m.x, m.y, m.r);
+          grad.addColorStop(0, `rgba(180, 200, 230, ${m.alpha})`);
+          grad.addColorStop(1, "rgba(180, 200, 230, 0)");
+          c.fillStyle = grad;
+          c.beginPath();
+          c.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+          c.fill();
+        }
+
+        // Rain streaks
+        c.lineWidth = 1;
+        for (const d of drops) {
+          c.strokeStyle = `rgba(186, 210, 245, ${d.alpha})`;
+          c.beginPath();
+          c.moveTo(d.x, d.y);
+          c.lineTo(d.x + d.drift * 2.2, d.y + d.len);
+          c.stroke();
+
+          d.x += d.drift;
+          d.y += d.speed;
+          if (d.y > canvas.height || d.x < -40) {
+            d.x = Math.random() * (canvas.width + 120);
+            d.y = -20;
+          }
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      window.addEventListener("resize", resize);
+      resize();
+      tick();
+    })();
+
+    /* =======================================================================
+       4. PERSISTENT GAME STATE & LOCALSTORAGE SAVE/RESUME
+       ======================================================================= */
+    const STORAGE_KEY = "last_secret_st_jude_v1";
+
+    function createInitialState() {
+      return {
+        started: false,
+        playerName: "Detective",
+        difficulty: "investigator",
+        level: 1,
+        completedLevels: [],
+        score: 100,
+        hintsUsed: 0,
+        wrongAccusations: 0,
+        startedAt: Date.now(),
+        lastSavedAt: Date.now(),
+        settings: {
+          muted: false,
+          volume: 0.55,
+          musicEnabled: true,
+          ambienceEnabled: true
+        },
+        evidenceIds: [],
+        notebookFacts: [
+          "Ms. Eleanor Vance (54) was discovered in the Old Library at ~06:20 AM on Opening Day of the Autumn Cultural Festival.",
+          "Eight close friends are investigating together—yet one of them is secretly responsible."
+        ],
+        unresolvedQuestions: [
+          "Why did the brass desk clock stop at 05:42 AM while the digital system clock shifted by 35 minutes?",
+          "What was inside the scholarship & endowment audit files Ms. Eleanor reviewed?"
+        ],
+        characterMemory: {}, // charId -> { talkedCount, pressed, accusedInEarlyLevel, flaggedSuspicious }
+        // Level-specific interactive states
+        l1: {
+          inspected: [],
+          talked: [],
+          selectedSuspects: []
+        },
+        l2: {
+          placements: {
+            aarohi: "east_hall",
+            meera: "glasshouse",
+            riya: "art_studio",
+            tara: "av_room",
+            ananya: "dormitory",
+            zoya: "dining_hall",
+            kavya: "recital_hall",
+            nandini: "west_cloister"
+          },
+          selectedAlibiContradictions: []
+        },
+        l3: {
+          diaryFound: false,
+          cipherAttempt: "",
+          cipherSolved: false,
+          selectedSecrets: []
+        },
+        l4: {
+          events: [
+            { id: "e_tea", label: "Bitter monkshood herbal tea is prepared and left near the library study table" },
+            { id: "e_clock_edit", label: "AV/Server terminal applies a +35-minute clock-sync offset to the library log" },
+            { id: "e_cardiac", label: "Ms. Eleanor suffers a cardiac event from the laced tea and falls by the window (~05:45 AM)" },
+            { id: "e_riya_pass", label: "Riya walks past the library corridor after 05:40 AM without entering, then returns her brass key" },
+            { id: "e_frame_removed", label: "A photograph is removed from its silver frame and the desk clock stops at 05:42 AM" },
+            { id: "e_discovery", label: "Ms. Eleanor is discovered in the Old Library at ~06:20 AM and the alarm is raised" }
+          ],
+          checkedOrder: false
+        },
+        l5: {
+          verifiedAuthentic: [],
+          flaggedFalse: []
+        },
+        l6: {
+          flaggedStatements: []
+        },
+        l7: {
+          twistRevealed: false,
+          accusedSuspectId: null,
+          proofChain: {
+            motive: "",
+            opportunity: "",
+            contradiction: "",
+            clue: ""
+          },
+          feedbackMsg: ""
+        },
+        l8: {
+          confrontationStep: 0
+        },
+        boardConnections: [] // { fromId, toId, note }
+      };
+    }
+
+    let state = loadSavedState() || createInitialState();
+
+    function loadSavedState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return { ...createInitialState(), ...parsed, settings: { ...createInitialState().settings, ...(parsed.settings || {}) } };
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function saveGame(silent = false) {
+      try {
+        state.lastSavedAt = Date.now();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        if (!silent) showToast("Progress saved to browser storage.");
+      } catch (e) {
+        if (!silent) showToast("Could not save progress (storage unavailable).");
+      }
+    }
+
+    function resetGame() {
+      localStorage.removeItem(STORAGE_KEY);
+      state = createInitialState();
+      renderApp();
+      showToast("Started a fresh mystery investigation.");
+    }
+
+    function addEvidence(id) {
+      if (!state.evidenceIds.includes(id)) {
+        state.evidenceIds.push(id);
+        state.score += 25;
+        const ev = EVIDENCE_CATALOG.find(e => e.id === id);
+        if (ev) {
+          addNotebookFact(`Clue logged: ${ev.title} — ${ev.summary}`);
+        }
+        SoundEngine.chime();
+        saveGame(true);
+      }
+    }
+
+    function addNotebookFact(fact) {
+      if (!state.notebookFacts.includes(fact)) {
+        state.notebookFacts.unshift(fact);
+      }
+    }
+
+    function getCharMem(id) {
+      if (!state.characterMemory[id]) {
+        state.characterMemory[id] = {
+          talkedCount: 0,
+          pressed: false,
+          accusedEarly: false,
+          flaggedSuspicious: false
+        };
+      }
+      return state.characterMemory[id];
+    }
+
+    function showToast(msg) {
+      const container = document.getElementById("toast-container");
+      container.innerHTML = `<div class="toast-banner" role="status">${escapeHtml(msg)}</div>`;
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => {
+        container.innerHTML = "";
+      }, 3600);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    /* =======================================================================
+       5. ORIGINAL SVG CHARACTER PORTRAITS & ILLUSTRATED SCENES
+       ======================================================================= */
+    function renderPortraitSVG(charId, sizeClass = "") {
+      const ch = CHARACTERS.find(c => c.id === charId) || CHARACTERS[0];
+      const expr = ch.id === "tara" && state.level >= 7 ? "shaken" : (ch.id === "nandini" && state.level === 5 ? "worried" : "calm");
+      const mouthPath =
+        expr === "shaken"
+          ? "M44,66 Q50,61 56,66"
+          : expr === "worried"
+          ? "M44,67 Q50,64 56,67"
+          : "M44,65 Q50,69 56,65";
+
+      return `
+        <div class="portrait-frame ${sizeClass}" title="${escapeHtml(ch.name)}">
+          <svg viewBox="0 0 100 100" width="100%" height="100%" aria-label="${escapeHtml(ch.name)} portrait">
+            <defs>
+              <linearGradient id="bg_${ch.id}" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1e2b47"/>
+                <stop offset="100%" stop-color="#0b101c"/>
+              </linearGradient>
+            </defs>
+            <rect width="100" height="100" fill="url(#bg_${ch.id})"/>
+            <!-- Back hair -->
+            ${ch.hairStyle === "braid" ? `
+              <path d="M28,36 Q50,14 72,36 L74,64 L26,64 Z" fill="${ch.hairColor}"/>
+              <rect x="45" y="70" width="10" height="24" rx="4" fill="${ch.hairColor}"/>
+            ` : ch.hairStyle === "twins" ? `
+              <path d="M30,36 Q50,16 70,36 L70,58 L30,58 Z" fill="${ch.hairColor}"/>
+              <rect x="20" y="50" width="10" height="32" rx="5" fill="${ch.hairColor}"/>
+              <rect x="70" y="50" width="10" height="32" rx="5" fill="${ch.hairColor}"/>
+            ` : ch.hairStyle === "ponytail" ? `
+              <path d="M30,38 Q50,16 70,38 L68,55 L32,55 Z" fill="${ch.hairColor}"/>
+              <path d="M58,22 Q82,24 80,52" stroke="${ch.hairColor}" stroke-width="9" fill="none" stroke-linecap="round"/>
+            ` : ch.hairStyle === "bun_glasses" ? `
+              <circle cx="50" cy="18" r="10" fill="${ch.hairColor}"/>
+              <path d="M31,40 Q50,20 69,40 L68,56 L32,56 Z" fill="${ch.hairColor}"/>
+            ` : `
+              <path d="M27,42 Q50,14 73,42 L74,62 L26,62 Z" fill="${ch.hairColor}"/>
+            `}
+            <!-- Shoulders / Outfit -->
+            <path d="M16,100 Q22,74 50,74 Q78,74 84,100 Z" fill="${ch.outfitColor}"/>
+            <path d="M40,74 L50,88 L60,74 Z" fill="${ch.accentColor}" opacity="0.85"/>
+            <!-- Neck -->
+            <rect x="44" y="63" width="12" height="14" rx="4" fill="${ch.skinColor}"/>
+            <!-- Face -->
+            <ellipse cx="50" cy="48" rx="18" ry="21" fill="${ch.skinColor}"/>
+            <!-- Front Hair / Bangs -->
+            ${ch.hairStyle === "asym_bob" ? `
+              <path d="M31,42 Q42,24 70,36 L68,58 L61,58 L60,41 Q45,35 32,54 Z" fill="${ch.hairColor}"/>
+            ` : `
+              <path d="M32,42 Q50,24 68,42 L68,35 Q50,18 32,35 Z" fill="${ch.hairColor}"/>
+            `}
+            <!-- Eyes -->
+            <circle cx="43" cy="48" r="2.5" fill="#111827"/>
+            <circle cx="57" cy="48" r="2.5" fill="#111827"/>
+            <circle cx="43.8" cy="47.2" r="0.9" fill="#fff"/>
+            <circle cx="57.8" cy="47.2" r="0.9" fill="#fff"/>
+            <!-- Glasses if Meera -->
+            ${ch.accessory === "glasses" ? `
+              <circle cx="43" cy="48" r="6.5" fill="none" stroke="${ch.accentColor}" stroke-width="1.6"/>
+              <circle cx="57" cy="48" r="6.5" fill="none" stroke="${ch.accentColor}" stroke-width="1.6"/>
+              <line x1="49.5" y1="48" x2="50.5" y2="48" stroke="${ch.accentColor}" stroke-width="1.6"/>
+            ` : ""}
+            <!-- Mouth -->
+            <path d="${mouthPath}" stroke="#5c2424" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <!-- Subtle gold rim -->
+            <circle cx="50" cy="50" r="48.5" fill="none" stroke="rgba(212,175,55,0.28)" stroke-width="1.5"/>
+          </svg>
+        </div>
+      `;
+    }
+
+    function renderOldLibrarySceneSVG() {
+      return `
+        <svg viewBox="0 0 1200 675" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Old Library crime scene at St. Jude Hillcrest Academy">
+          <defs>
+            <linearGradient id="wallGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#0b1222"/>
+              <stop offset="65%" stop-color="#131d33"/>
+              <stop offset="100%" stop-color="#0a0f1c"/>
+            </linearGradient>
+            <linearGradient id="moonBeam" x1="0" y1="0" x2="0.4" y2="1">
+              <stop offset="0%" stop-color="#9ec5ff" stop-opacity="0.22"/>
+              <stop offset="100%" stop-color="#9ec5ff" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="lampGlow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f3d27a" stop-opacity="0.34"/>
+              <stop offset="100%" stop-color="#f3d27a" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="rugGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#4e1326"/>
+              <stop offset="100%" stop-color="#290914"/>
+            </linearGradient>
+          </defs>
+
+          <!-- Walls & Wood Floor -->
+          <rect width="1200" height="510" fill="url(#wallGrad)"/>
+          <rect y="510" width="1200" height="165" fill="#140e0c"/>
+          <line x1="0" y1="510" x2="1200" y2="510" stroke="#3d291c" stroke-width="3"/>
+
+          <!-- Persian Rug -->
+          <polygon points="220,525 980,525 1060,655 140,655" fill="url(#rugGrad)" stroke="#d4af37" stroke-width="2" opacity="0.9"/>
+
+          <!-- Tall Mullion Window on Left -->
+          <rect x="85" y="75" width="215" height="330" rx="6" fill="#091326" stroke="#4a3525" stroke-width="8"/>
+          <polygon points="85,75 300,75 560,520 85,520" fill="url(#moonBeam)"/>
+          <line x1="192" y1="75" x2="192" y2="405" stroke="#4a3525" stroke-width="6"/>
+          <line x1="85" y1="185" x2="300" y2="185" stroke="#4a3525" stroke-width="6"/>
+          <line x1="85" y1="295" x2="300" y2="295" stroke="#4a3525" stroke-width="6"/>
+          <!-- Rain streaks on glass -->
+          <line x1="120" y1="100" x2="112" y2="145" stroke="#b9d6ff" stroke-opacity="0.35" stroke-width="1.5"/>
+          <line x1="230" y1="120" x2="222" y2="170" stroke="#b9d6ff" stroke-opacity="0.3" stroke-width="1.5"/>
+          <line x1="150" y1="220" x2="142" y2="275" stroke="#b9d6ff" stroke-opacity="0.28" stroke-width="1.5"/>
+
+          <!-- Rolling Library Ladder -->
+          <line x1="365" y1="90" x2="335" y2="515" stroke="#6e472b" stroke-width="7"/>
+          <line x1="415" y1="90" x2="385" y2="515" stroke="#6e472b" stroke-width="7"/>
+          <line x1="360" y1="150" x2="410" y2="150" stroke="#8c5c38" stroke-width="4"/>
+          <line x1="354" y1="220" x2="404" y2="220" stroke="#8c5c38" stroke-width="4"/>
+          <line x1="348" y1="290" x2="398" y2="290" stroke="#8c5c38" stroke-width="4"/>
+          <line x1="342" y1="360" x2="392" y2="360" stroke="#8c5c38" stroke-width="4"/>
+
+          <!-- Bookshelves on Right -->
+          <rect x="830" y="80" width="310" height="390" fill="#1b120e" stroke="#4d3322" stroke-width="5"/>
+          <line x1="830" y1="175" x2="1140" y2="175" stroke="#4d3322" stroke-width="5"/>
+          <line x1="830" y1="270" x2="1140" y2="270" stroke="#4d3322" stroke-width="5"/>
+          <line x1="830" y1="365" x2="1140" y2="365" stroke="#4d3322" stroke-width="5"/>
+          <!-- Colorful book spines -->
+          <rect x="845" y="112" width="16" height="60" fill="#7c1d38"/>
+          <rect x="865" y="118" width="18" height="54" fill="#23436b"/>
+          <rect x="887" y="110" width="14" height="62" fill="#2c5e48"/>
+          <rect x="905" y="120" width="20" height="52" fill="#9c7a24"/>
+          <rect x="930" y="114" width="16" height="58" fill="#5e2a4c"/>
+
+          <!-- Mahogany Study Desk -->
+          <polygon points="485,375 785,375 815,415 455,415" fill="#472817" stroke="#d4af37" stroke-width="1.5"/>
+          <rect x="495" y="415" width="24" height="105" fill="#2e190e"/>
+          <rect x="751" y="415" width="24" height="105" fill="#2e190e"/>
+          <!-- Brass Lamp & Glow -->
+          <path d="M530,375 L542,330 L566,330 L578,375 Z" fill="#d4af37"/>
+          <polygon points="554,335 430,540 690,540" fill="url(#lampGlow)"/>
+
+          <!-- Tea Cup on Desk -->
+          <ellipse cx="625" cy="370" rx="14" ry="6" fill="#e2e8f0"/>
+          <path d="M614,358 L636,358 L633,370 L617,370 Z" fill="#f8fafc"/>
+
+          <!-- Stopped Clock on Desk -->
+          <circle cx="710" cy="355" r="18" fill="#1e293b" stroke="#d4af37" stroke-width="3"/>
+          <line x1="710" y1="355" x2="710" y2="344" stroke="#f3d27a" stroke-width="2"/>
+          <line x1="710" y1="355" x2="720" y2="355" stroke="#f3d27a" stroke-width="2"/>
+
+          <!-- Open Book / Audit Ledger on Desk -->
+          <polygon points="650,376 686,372 686,392 650,396" fill="#fef3c7"/>
+          <polygon points="686,372 722,376 722,396 686,392" fill="#fde68a"/>
+
+          <!-- Empty Silver Frame on Side Table (Left-Center) -->
+          <rect x="245" y="438" width="44" height="54" rx="3" fill="#111827" stroke="#cbd5e1" stroke-width="3"/>
+          <rect x="251" y="444" width="32" height="42" fill="#090d16"/>
+
+          <!-- Non-graphic Dignified Silhouette of Ms. Eleanor Resting Near Rug/Chair -->
+          <ellipse cx="475" cy="565" rx="58" ry="18" fill="#1c2336" opacity="0.85"/>
+          <path d="M425,562 Q475,538 530,564 Q515,578 425,572 Z" fill="#3b1829"/>
+          <circle cx="422" cy="555" r="13" fill="#dfb392"/>
+          <path d="M412,550 Q422,538 434,548" stroke="#cbd5e1" stroke-width="5" fill="none" stroke-linecap="round"/>
+
+          <!-- Label -->
+          <text x="600" y="44" text-anchor="middle" fill="#f3d27a" font-family="Cinzel, Georgia, serif" font-size="22" letter-spacing="4">
+            OLD LIBRARY — ST. JUDE HILLCREST ACADEMY
+          </text>
+        </svg>
+      `;
+    }
+
+    /* =======================================================================
+       6. DRAWERS & MODALS (EVIDENCE, LIVING BOARD, TIMELINE, NOTEBOOK, HINTS)
+       ======================================================================= */
+    function openDrawer(tab) {
+      SoundEngine.pageTurn();
+      const overlay = document.getElementById("overlay-container");
+      const isWide = tab === "board";
+
+      overlay.innerHTML = `
+        <div class="drawer-backdrop" id="drawer-backdrop" role="dialog" aria-modal="true" aria-label="Detective Drawer">
+          <div class="drawer-panel ${isWide ? "wide" : ""}">
+            <div class="drawer-header">
+              <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+                <button class="btn-hud ${tab === "evidence" ? "active-tab" : ""}" data-switch-drawer="evidence">Clues (${state.evidenceIds.length})</button>
+                <button class="btn-hud ${tab === "board" ? "active-tab" : ""}" data-switch-drawer="board">Living Board (${state.boardConnections.length})</button>
+                <button class="btn-hud ${tab === "timeline" ? "active-tab" : ""}" data-switch-drawer="timeline">Timeline</button>
+                <button class="btn-hud ${tab === "notebook" ? "active-tab" : ""}" data-switch-drawer="notebook">Notebook</button>
+              </div>
+              <button class="btn-secondary" id="close-drawer-btn" style="padding:0.35rem 0.75rem;font-size:0.8rem;">Close ✕</button>
+            </div>
+            <div class="drawer-body" id="drawer-content">
+              ${renderDrawerBody(tab)}
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("drawer-backdrop").addEventListener("click", (e) => {
+        if (e.target.id === "drawer-backdrop") closeOverlay();
+      });
+      document.getElementById("close-drawer-btn").addEventListener("click", closeOverlay);
+
+      document.querySelectorAll("[data-switch-drawer]").forEach(btn => {
+        btn.addEventListener("click", () => openDrawer(btn.dataset.switchDrawer));
+      });
+
+      bindDrawerInteractions(tab);
+    }
+
+    function closeOverlay() {
+      document.getElementById("overlay-container").innerHTML = "";
+    }
+
+    function renderDrawerBody(tab) {
+      if (tab === "evidence") {
+        if (state.evidenceIds.length === 0) {
+          return `<div class="panel-card" style="padding:1.25rem;color:var(--text-muted);">No clues collected yet. Inspect objects in the Old Library and advance through the investigation to gather physical, digital, document, and testimony evidence.</div>`;
+        }
+        const categories = ["All", "Physical", "Documents", "Digital", "Testimony"];
+        const cards = state.evidenceIds
+          .map(id => EVIDENCE_CATALOG.find(e => e.id === id))
+          .filter(Boolean)
+          .map(ev => `
+            <div class="panel-card ev-card-item" data-cat="${escapeHtml(ev.category)}" style="padding:1rem;">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;">
+                <h4 style="color:var(--gold-light);font-size:0.98rem;">${escapeHtml(ev.title)}</h4>
+                <span style="font-size:0.72rem;padding:0.15rem 0.55rem;border-radius:999px;background:rgba(212,175,55,0.16);color:var(--gold);border:1px solid var(--border-subtle);">${escapeHtml(ev.category)} • Lv.${ev.level}</span>
+              </div>
+              <p style="font-size:0.88rem;margin-top:0.45rem;">${escapeHtml(ev.summary)}</p>
+              <p style="font-size:0.82rem;color:var(--text-muted);margin-top:0.35rem;">${escapeHtml(ev.detail)}</p>
+            </div>
+          `).join("");
+
+        return `
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem;">
+            ${categories.map((cat, idx) => `<button class="btn-hud ev-filter-btn ${idx === 0 ? "active-tab" : ""}" data-ev-filter="${cat}">${cat}</button>`).join("")}
+          </div>
+          <div id="ev-list-wrap" style="display:flex;flex-direction:column;gap:0.75rem;">${cards}</div>
+        `;
+      }
+
+      if (tab === "board") {
+        const unlockedClues = EVIDENCE_CATALOG.filter(e => state.evidenceIds.includes(e.id));
+        const motives = [
+          { id: "m_scholarship", label: "Scholarship & Endowment Audit Leak (Tara's family firm)" },
+          { id: "m_mural", label: "Festival Mural Dispute & Key (Riya — Red Herring)" },
+          { id: "m_herbs", label: "Wild Botany Tea & Glasshouse Notes (Meera — Red Herring)" },
+          { id: "m_letter", label: "Private Family Letter in Cloister (Nandini — Framed)" }
+        ];
+
+        const linksHtml = state.boardConnections.map((conn, idx) => `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;background:var(--bg-panel);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0.5rem 0.75rem;font-size:0.82rem;">
+            <span><strong style="color:var(--gold-light);">${escapeHtml(conn.aLabel)}</strong> <span style="color:#f87171;">━━</span> <strong>${escapeHtml(conn.bLabel)}</strong> — <span style="color:var(--text-muted);">${escapeHtml(conn.note)}</span></span>
+            <button class="btn-hud" data-remove-link="${idx}" style="padding:0.2rem 0.5rem;">Remove</button>
+          </div>
+        `).join("");
+
+        return `
+          <p style="font-size:0.86rem;color:var(--text-muted);">
+            Click any <strong>Suspect</strong>, <strong>Collected Clue</strong>, or <strong>Motive/Angle</strong> card below, then click another card to link them with an investigative thread. Misaligned threads prompt a helpful detective question instead of a harsh error.
+          </p>
+          <div class="board-canvas-wrap" id="living-board-area">
+            <svg class="board-strings-svg" id="board-svg-lines"></svg>
+            <div class="board-columns">
+              <div>
+                <h4 style="color:var(--gold);font-size:0.82rem;text-transform:uppercase;margin-bottom:0.5rem;">Suspects (8)</h4>
+                ${CHARACTERS.map(c => `
+                  <div class="board-node" data-node-type="suspect" data-node-id="sus_${c.id}" data-node-label="${escapeHtml(c.name)}">
+                    <strong>${escapeHtml(c.name)}</strong> <span style="color:var(--text-muted);font-size:0.74rem;">(${escapeHtml(c.archetype)})</span>
+                  </div>
+                `).join("")}
+              </div>
+              <div>
+                <h4 style="color:var(--gold);font-size:0.82rem;text-transform:uppercase;margin-bottom:0.5rem;">Collected Clues (${unlockedClues.length})</h4>
+                ${unlockedClues.length ? unlockedClues.map(ev => `
+                  <div class="board-node" data-node-type="clue" data-node-id="${ev.id}" data-node-label="${escapeHtml(ev.title)}">
+                    <strong>${escapeHtml(ev.title)}</strong> <span style="color:var(--gold);font-size:0.72rem;">[${escapeHtml(ev.category)}]</span>
+                  </div>
+                `).join("") : `<div style="font-size:0.8rem;color:var(--text-dim);">Collect clues in levels to pin them here.</div>`}
+              </div>
+              <div>
+                <h4 style="color:var(--gold);font-size:0.82rem;text-transform:uppercase;margin-bottom:0.5rem;">Motives & Angles</h4>
+                ${motives.map(m => `
+                  <div class="board-node" data-node-type="motive" data-node-id="${m.id}" data-node-label="${escapeHtml(m.label)}">
+                    ${escapeHtml(m.label)}
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.45rem;">
+            <h4 style="color:var(--gold-light);font-size:0.88rem;">Active String Threads (${state.boardConnections.length})</h4>
+            ${linksHtml || `<div style="font-size:0.8rem;color:var(--text-muted);">No threads pinned yet. Click two nodes above to connect them.</div>`}
+          </div>
+        `;
+      }
+
+      if (tab === "timeline") {
+        return `
+          <div class="panel-card" style="padding:1rem;">
+            <h4 style="color:var(--gold-light);margin-bottom:0.45rem;">Key Dawn Reference Points</h4>
+            <ul style="padding-left:1.15rem;font-size:0.86rem;display:flex;flex-direction:column;gap:0.35rem;">
+              <li><strong>05:00 AM – 06:15 AM:</strong> Tara claims continuous AV/Server Room calibration—yet a +35-minute clock-sync edit occurred at 05:12 AM.</li>
+              <li><strong>05:15 AM – 06:00 AM:</strong> Meera logged glasshouse humidity; Kavya rehearsed in Recital Hall.</li>
+              <li><strong>05:42 AM:</strong> Brass desk clock stopped on impact; estimated cardiac collapse occurred around ~05:45 AM near the library window/desk.</li>
+              <li><strong>After 05:40 AM:</strong> Riya walked past the library corridor before returning her brass key; Nandini had a secret cloister/family-letter meeting.</li>
+              <li><strong>~06:20 AM:</strong> Ms. Eleanor was discovered in the Old Library.</li>
+            </ul>
+          </div>
+          <div class="panel-card" style="padding:1rem;">
+            <h4 style="color:var(--gold-light);margin-bottom:0.45rem;">Alibi Cross-Check</h4>
+            ${CHARACTERS.map(c => {
+              const room = ROOMS.find(r => r.id === state.l2.placements[c.id]);
+              return `<div style="font-size:0.84rem;padding:0.3rem 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+                <strong>${escapeHtml(c.name)}</strong> → Placed at <em>${escapeHtml(room ? room.name : "Unassigned")}</em> (${escapeHtml(c.alibi)})
+              </div>`;
+            }).join("")}
+          </div>
+        `;
+      }
+
+      // Notebook
+      return `
+        <div class="panel-card" style="padding:1rem;">
+          <h4 style="color:var(--gold-light);margin-bottom:0.5rem;">Replay or Jump to Unlocked/Available Chapters</h4>
+          <div style="display:flex;flex-wrap:wrap;gap:0.45rem;">
+            ${LEVEL_META.map(m => {
+              const unlocked = m.num <= state.level || state.completedLevels.includes(m.num);
+              return `<button class="btn-hud" data-jump-level="${m.num}" ${unlocked ? "" : "disabled style='opacity:0.4;cursor:not-allowed;'"}>Lv.${m.num}: ${escapeHtml(m.title)}</button>`;
+            }).join("")}
+          </div>
+        </div>
+        <div class="panel-card" style="padding:1rem;">
+          <h4 style="color:var(--gold-light);margin-bottom:0.5rem;">Unresolved Questions</h4>
+          <ul style="padding-left:1.15rem;font-size:0.85rem;color:#f3d27a;display:flex;flex-direction:column;gap:0.35rem;">
+            ${state.unresolvedQuestions.map(q => `<li>${escapeHtml(q)}</li>`).join("")}
+          </ul>
+        </div>
+        <div class="panel-card" style="padding:1rem;">
+          <h4 style="color:var(--gold-light);margin-bottom:0.5rem;">Recorded Investigation Facts (${state.notebookFacts.length})</h4>
+          <ul style="padding-left:1.15rem;font-size:0.84rem;display:flex;flex-direction:column;gap:0.4rem;">
+            ${state.notebookFacts.map(f => `<li>${escapeHtml(f)}</li>`).join("")}
+          </ul>
+        </div>
+      `;
+    }
+
+    function bindDrawerInteractions(tab) {
+      if (tab === "evidence") {
+        document.querySelectorAll("[data-ev-filter]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            document.querySelectorAll("[data-ev-filter]").forEach(b => b.classList.remove("active-tab"));
+            btn.classList.add("active-tab");
+            const cat = btn.dataset.evFilter;
+            document.querySelectorAll(".ev-card-item").forEach(card => {
+              card.style.display = (cat === "All" || card.dataset.cat === cat) ? "" : "none";
+            });
+          });
+        });
+      }
+
+      if (tab === "board") {
+        let firstSelected = null;
+        drawBoardStrings();
+
+        document.querySelectorAll(".board-node").forEach(node => {
+          node.addEventListener("click", () => {
+            SoundEngine.pageTurn();
+            if (!firstSelected) {
+              firstSelected = node;
+              node.classList.add("link-source");
+              showToast(`Selected "${node.dataset.nodeLabel}". Click another card to connect.`);
+              return;
+            }
+            if (firstSelected === node) {
+              node.classList.remove("link-source");
+              firstSelected = null;
+              return;
+            }
+            const a = { id: firstSelected.dataset.nodeId, type: firstSelected.dataset.nodeType, label: firstSelected.dataset.nodeLabel };
+            const b = { id: node.dataset.nodeId, type: node.dataset.nodeType, label: node.dataset.nodeLabel };
+            firstSelected.classList.remove("link-source");
+            firstSelected = null;
+
+            const exists = state.boardConnections.some(c => (c.aId === a.id && c.bId === b.id) || (c.aId === b.id && c.bId === a.id));
+            if (exists) {
+              showToast("Those two cards are already connected on the board.");
+              return;
+            }
+
+            const analysis = evaluateBoardLink(a, b);
+            state.boardConnections.push({
+              aId: a.id,
+              bId: b.id,
+              aLabel: a.label,
+              bLabel: b.label,
+              note: analysis.note
+            });
+            if (analysis.isStrong) {
+              state.score += 20;
+            }
+            saveGame(true);
+            showToast(analysis.question);
+            openDrawer("board");
+          });
+        });
+
+        document.querySelectorAll("[data-remove-link]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const idx = Number(btn.dataset.removeLink);
+            state.boardConnections.splice(idx, 1);
+            saveGame(true);
+            openDrawer("board");
+          });
+        });
+      }
+
+      if (tab === "notebook") {
+        document.querySelectorAll("[data-jump-level]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const targetLv = Number(btn.dataset.jumpLevel);
+            state.level = targetLv;
+            saveGame(true);
+            closeOverlay();
+            renderApp();
+            showToast(`Opened Level ${targetLv}: ${LEVEL_META[targetLv - 1].title}`);
+          });
+        });
+      }
+    }
+
+    function evaluateBoardLink(a, b) {
+      const pair = [a.id, b.id].sort().join("|");
+      if (pair.includes("sus_tara") && (pair.includes("m_scholarship") || pair.includes("ev_cctv_sync") || pair.includes("ev_scholarship_memo") || pair.includes("ev_clue_curation_log"))) {
+        return {
+          isStrong: true,
+          note: "Strong lead — ties Tara to audit/clock manipulation",
+          question: "Sharp connection: How does Tara's server/clock access connect to the scholarship audit files?"
+        };
+      }
+      if (pair.includes("sus_riya") && pair.includes("m_mural")) {
+        return {
+          isStrong: false,
+          note: "Red herring check — argument vs. murder method",
+          question: "Question to ask: Riya argued about a mural—does a loud argument explain a +35-minute clock-sync edit?"
+        };
+      }
+      if (pair.includes("sus_meera") && pair.includes("m_herbs")) {
+        return {
+          isStrong: false,
+          note: "Botany lead — check timing & alibi",
+          question: "Question to ask: Meera studied herbs in the glasshouse, but who altered the library clock log?"
+        };
+      }
+      if (pair.includes("sus_nandini") && pair.includes("ev_doctored_photo")) {
+        return {
+          isStrong: true,
+          note: "False-trail check — photo altered to frame Nandini",
+          question: "Question to ask: If the cloister photo was edited, who wanted Nandini to look guilty?"
+        };
+      }
+      return {
+        isStrong: false,
+        note: "Exploratory thread",
+        question: `Investigative question: What links "${a.label}" to "${b.label}" in the dawn timeline?`
+      };
+    }
+
+    function drawBoardStrings() {
+      const svg = document.getElementById("board-svg-lines");
+      const wrap = document.getElementById("living-board-area");
+      if (!svg || !wrap) return;
+      const wrapRect = wrap.getBoundingClientRect();
+      svg.setAttribute("viewBox", `0 0 ${Math.max(100, wrapRect.width)} ${Math.max(100, wrapRect.height)}`);
+      let lines = "";
+      for (const conn of state.boardConnections) {
+        const elA = wrap.querySelector(`[data-node-id="${CSS.escape(conn.aId)}"]`);
+        const elB = wrap.querySelector(`[data-node-id="${CSS.escape(conn.bId)}"]`);
+        if (!elA || !elB) continue;
+        const rA = elA.getBoundingClientRect();
+        const rB = elB.getBoundingClientRect();
+        const x1 = rA.left - wrapRect.left + rA.width / 2;
+        const y1 = rA.top - wrapRect.top + rA.height / 2;
+        const x2 = rB.left - wrapRect.left + rB.width / 2;
+        const y2 = rB.top - wrapRect.top + rB.height / 2;
+        lines += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#e11d48" stroke-width="2.2" stroke-dasharray="5,3" opacity="0.82"/>`;
+        lines += `<circle cx="${x1}" cy="${y1}" r="4" fill="#f3d27a"/>`;
+        lines += `<circle cx="${x2}" cy="${y2}" r="4" fill="#f3d27a"/>`;
+      }
+      svg.innerHTML = lines;
+    }
+
+    function openHintModal() {
+      SoundEngine.chime();
+      const diff = STORY_BIBLE.difficulties[state.difficulty] || STORY_BIBLE.difficulties.investigator;
+      const hintByLevel = {
+        1: "Inspect all five highlighted spots in the Old Library—especially the stopped clock (05:42), tea cup, and torn audit slip—then choose three suspicious details.",
+        2: "Check everyone's dawn location on the academy map. Pay close attention to Riya's hesitant corridor pass and Tara's 35-minute AV/Server Room gap.",
+        3: "Locate Ms. Eleanor's concealed diary first. The cipher shifts letters by 3 steps (e.g., S→P, T→Q)—look for words about a 'PORTAL BREACH' and 'SCHOLARSHIP LEDGER'.",
+        4: "Start with what happened before the fall (tea prepared, clock-sync edit), then the fall (~05:45 AM), corridor pass & frame removal, and finally discovery at ~06:20 AM.",
+        5: "Compare photo/message details against timestamps and Nandini's family-letter secret. Doctored imagery and planted finger-pointing messages are false trails.",
+        6: "Look at who had both tech access to shift the clock log and a stake in keeping scholarship/endowment audit files quiet.",
+        7: "Don't forget the twist within the twist: Tara helped steer early attention toward red herrings. Build your proof chain using Tara's motive, AV/clock opportunity, alibi contradiction, and physical/digital proof.",
+        8: "Step through the confrontation to review the complete chain of events, motive, method, red herrings, and epilogues, then view your Detective Certificate."
+      };
+
+      const penalty = state.difficulty === "detective" ? 0 : (diff.hintPenalty || 25);
+      if (penalty > 0 && state.hintsUsed > 0) {
+        state.score = Math.max(0, state.score - penalty);
+      }
+      state.hintsUsed += 1;
+      saveGame(true);
+
+      const overlay = document.getElementById("overlay-container");
+      overlay.innerHTML = `
+        <div class="modal-backdrop" id="hint-backdrop" role="dialog" aria-modal="true">
+          <div class="modal-card">
+            <h3 style="color:var(--gold-light);margin-bottom:0.5rem;">Detective Hint — Level ${state.level}</h3>
+            <p style="font-size:0.92rem;margin-bottom:0.85rem;">${escapeHtml(hintByLevel[state.level] || "Review your collected clues and timeline.")}</p>
+            <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1rem;">Mode: <strong>${escapeHtml(diff.name)}</strong> • Hints used: ${state.hintsUsed}</p>
+            <div style="display:flex;justify-content:flex-end;">
+              <button class="btn-gold" id="close-hint-btn">Back to Investigation</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById("close-hint-btn").addEventListener("click", closeOverlay);
+      document.getElementById("hint-backdrop").addEventListener("click", e => {
+        if (e.target.id === "hint-backdrop") closeOverlay();
+      });
+      renderHudStatsOnly();
+    }
+
+    function openSettingsModal() {
+      SoundEngine.pageTurn();
+      const overlay = document.getElementById("overlay-container");
+      overlay.innerHTML = `
+        <div class="modal-backdrop" id="settings-backdrop" role="dialog" aria-modal="true">
+          <div class="modal-card">
+            <h3 style="color:var(--gold-light);margin-bottom:0.75rem;">Atmosphere, Audio & Save Controls</h3>
+            <div style="display:flex;flex-direction:column;gap:0.85rem;font-size:0.9rem;">
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+                <span>Mute All Audio</span>
+                <input type="checkbox" id="opt-muted" ${state.settings.muted ? "checked" : ""} />
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+                <span>Master Volume (${Math.round(state.settings.volume * 100)}%)</span>
+                <input type="range" id="opt-volume" min="0" max="1" step="0.05" value="${state.settings.volume}" />
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+                <span>Suspense Drone Music</span>
+                <input type="checkbox" id="opt-music" ${state.settings.musicEnabled ? "checked" : ""} />
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+                <span>Hill-Station Rain Ambience</span>
+                <input type="checkbox" id="opt-rain" ${state.settings.ambienceEnabled ? "checked" : ""} />
+              </label>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:0.6rem;margin-top:1.35rem;">
+              <div style="display:flex;gap:0.5rem;">
+                <button class="btn-secondary" id="opt-save-now">Save Now</button>
+                <button class="btn-secondary" id="opt-reset-game" style="border-color:rgba(201,59,75,0.6);color:#fca5a5;">New / Reset</button>
+              </div>
+              <button class="btn-gold" id="opt-done">Done</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const applyChanges = () => {
+        state.settings.muted = document.getElementById("opt-muted").checked;
+        state.settings.volume = Number(document.getElementById("opt-volume").value);
+        state.settings.musicEnabled = document.getElementById("opt-music").checked;
+        state.settings.ambienceEnabled = document.getElementById("opt-rain").checked;
+        SoundEngine.unlockAndSync();
+        saveGame(true);
+      };
+
+      ["opt-muted", "opt-volume", "opt-music", "opt-rain"].forEach(id => {
+        document.getElementById(id).addEventListener("change", applyChanges);
+        document.getElementById(id).addEventListener("input", applyChanges);
+      });
+
+      document.getElementById("opt-save-now").addEventListener("click", () => saveGame(false));
+      document.getElementById("opt-reset-game").addEventListener("click", () => {
+        closeOverlay();
+        resetGame();
+      });
+      document.getElementById("opt-done").addEventListener("click", () => {
+        closeOverlay();
+        renderApp();
+      });
+      document.getElementById("settings-backdrop").addEventListener("click", e => {
+        if (e.target.id === "settings-backdrop") closeOverlay();
+      });
+    }
+
+    /* =======================================================================
+       7. MAIN RENDERING & LEVEL CONTROLLERS (LEVELS 1 TO 8)
+       ======================================================================= */
+    function renderHudStatsOnly() {
+      const scoreEl = document.getElementById("hud-score-val");
+      const clueEl = document.getElementById("hud-clue-val");
+      if (scoreEl) scoreEl.textContent = Math.round(state.score);
+      if (clueEl) clueEl.textContent = `${state.evidenceIds.length}/${EVIDENCE_CATALOG.length}`;
+    }
+
+    function renderApp() {
+      const shell = document.getElementById("app-shell");
+
+      if (!state.started) {
+        const hasSave = Boolean(localStorage.getItem(STORAGE_KEY));
+        shell.innerHTML = `
+          <header class="top-hud">
+            <div class="hud-brand">
+              <span style="font-size:1.3rem;color:var(--gold-light);">✦</span>
+              <div class="hud-title-group">
+                <span class="hud-brand-title">${escapeHtml(STORY_BIBLE.title)}</span>
+                <span class="hud-level-badge">${escapeHtml(STORY_BIBLE.academy)}</span>
+              </div>
+            </div>
+            <div class="hud-actions">
+              <button class="btn-hud" id="title-mute-btn">${state.settings.muted ? "🔇 Muted" : "🔊 Audio On"}</button>
+              <button class="btn-hud" id="title-settings-btn">⚙ Settings</button>
+            </div>
+          </header>
+
+          <main class="title-screen">
+            <div class="crest-hero">
+              <span class="crest-kicker">${escapeHtml(STORY_BIBLE.setting)}</span>
+              <h1 class="main-game-title">${escapeHtml(STORY_BIBLE.title)}</h1>
+              <div class="main-game-subtitle">${escapeHtml(STORY_BIBLE.subtitle)}</div>
+
+              <div class="premise-box">
+                <p>
+                  At <strong>St. Jude Hillcrest Academy</strong>, eight close friends are gathered during the Autumn Cultural Festival when their beloved mentor, <strong>Ms. Eleanor Vance</strong>, is found dead inside the <strong>Old Library</strong> at dawn. What first looks like a tragic accident hides tampered timings, concealed secrets, and a quiet betrayal inside the circle itself.
+                </p>
+                <p style="margin-top:0.55rem;color:var(--text-muted);font-size:0.88rem;">
+                  Investigate across eight connected chapters, collect clues, map alibis, decode messages, spot planted evidence, and prove the truth through deduction.
+                </p>
+              </div>
+            </div>
+
+            <div class="setup-grid">
+              <div class="panel-card" style="padding:1.15rem;">
+                <h3 style="color:var(--gold-light);font-size:0.98rem;margin-bottom:0.65rem;">Detective Name</h3>
+                <input
+                  type="text"
+                  id="detective-name-input"
+                  value="${escapeHtml(state.playerName)}"
+                  maxlength="32"
+                  placeholder="Enter your detective name"
+                  style="width:100%;padding:0.65rem 0.85rem;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);background:var(--bg-navy);color:var(--text-main);font-size:0.92rem;margin-bottom:0.9rem;"
+                />
+                <div style="display:flex;flex-wrap:wrap;gap:0.65rem;">
+                  <button class="btn-primary" id="start-new-btn" style="flex:1;min-width:160px;">Begin Investigation</button>
+                  ${hasSave && state.level >= 1 ? `<button class="btn-gold" id="resume-save-btn" style="flex:1;min-width:160px;">Resume (Lv.${state.level})</button>` : ""}
+                </div>
+              </div>
+
+              <div class="panel-card" style="padding:1.15rem;display:flex;flex-direction:column;gap:0.55rem;">
+                <h3 style="color:var(--gold-light);font-size:0.98rem;">Select Difficulty Mode</h3>
+                ${Object.values(STORY_BIBLE.difficulties).map(d => `
+                  <button class="difficulty-option ${state.difficulty === d.id ? "selected" : ""}" data-diff="${d.id}">
+                    <span class="difficulty-name">
+                      <span>${escapeHtml(d.name)}</span>
+                      <span style="font-size:0.75rem;color:var(--gold);">${d.scoreMultiplier}× Score</span>
+                    </span>
+                    <span class="difficulty-desc">${escapeHtml(d.desc)}</span>
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+
+            <section class="cast-strip" aria-label="The Eight Friends">
+              <div class="cast-strip-title">The Eight Friends of St. Jude Hillcrest</div>
+              <div class="cast-grid-8">
+                ${CHARACTERS.map(c => `
+                  <div class="cast-mini-card">
+                    <div style="display:flex;justify-content:center;">${renderPortraitSVG(c.id)}</div>
+                    <div class="cast-mini-name">${escapeHtml(c.name)}</div>
+                    <div class="cast-mini-role">${escapeHtml(c.archetype)}</div>
+                  </div>
+                `).join("")}
+              </div>
+            </section>
+          </main>
+        `;
+
+        document.getElementById("title-mute-btn").addEventListener("click", () => {
+          state.settings.muted = !state.settings.muted;
+          SoundEngine.unlockAndSync();
+          saveGame(true);
+          renderApp();
+        });
+        document.getElementById("title-settings-btn").addEventListener("click", openSettingsModal);
+        document.getElementById("detective-name-input").addEventListener("input", e => {
+          state.playerName = e.target.value.trim() || "Detective";
+        });
+        document.querySelectorAll("[data-diff]").forEach(btn => {
+          btn.addEventListener("click", () => {
+            state.difficulty = btn.dataset.diff;
+            SoundEngine.pageTurn();
+            renderApp();
+          });
+        });
+        document.getElementById("start-new-btn").addEventListener("click", () => {
+          const typedName = document.getElementById("detective-name-input").value.trim() || "Detective";
+          const chosenDiff = state.difficulty;
+          const audioOpts = { ...state.settings };
+          state = createInitialState();
+          state.playerName = typedName;
+          state.difficulty = chosenDiff;
+          state.settings = audioOpts;
+          state.started = true;
+          SoundEngine.doorCreak();
+          saveGame(true);
+          renderApp();
+        });
+        const resumeBtn = document.getElementById("resume-save-btn");
+        if (resumeBtn) {
+          resumeBtn.addEventListener("click", () => {
+            state.started = true;
+            SoundEngine.footstep();
+            saveGame(true);
+            renderApp();
+          });
+        }
+        return;
+      }
+
+      // Active Investigation HUD + Level Content
+      const meta = LEVEL_META[state.level - 1] || LEVEL_META[0];
+      shell.innerHTML = `
+        <header class="top-hud">
+          <div class="hud-brand">
+            <button class="btn-hud" id="hud-home-btn" title="Title Screen">⌂ Title</button>
+            <div class="hud-title-group">
+              <span class="hud-brand-title">${escapeHtml(STORY_BIBLE.title)}</span>
+              <span class="hud-level-badge">
+                <span>Level ${meta.num}/8: <strong>${escapeHtml(meta.title)}</strong></span>
+              </span>
+            </div>
+          </div>
+
+          <div class="hud-stats">
+            <div class="stat-pill">Detective: <strong>${escapeHtml(state.playerName)}</strong></div>
+            <div class="stat-pill">Score: <strong id="hud-score-val">${Math.round(state.score)}</strong></div>
+            <div class="stat-pill">Clues: <strong id="hud-clue-val">${state.evidenceIds.length}/${EVIDENCE_CATALOG.length}</strong></div>
+          </div>
+
+          <div class="hud-actions">
+            <button class="btn-hud" id="open-evidence-btn">Clues <span class="badge-count">${state.evidenceIds.length}</span></button>
+            <button class="btn-hud" id="open-board-btn">Board</button>
+            <button class="btn-hud" id="open-timeline-btn">Timeline</button>
+            <button class="btn-hud" id="open-notebook-btn">Notebook</button>
+            <button class="btn-hud" id="open-hint-btn">Hint</button>
+            <button class="btn-hud" id="hud-save-btn">Save</button>
+            <button class="btn-hud" id="open-settings-btn">${state.settings.muted ? "🔇" : "🔊"}</button>
+          </div>
+        </header>
+
+        <main class="game-workspace">
+          <section class="chapter-banner">
+            <div>
+              <div class="chapter-kicker">Chapter ${meta.num} of 8 • ${escapeHtml(STORY_BIBLE.difficulties[state.difficulty].name)} Mode</div>
+              <h2 class="chapter-heading">${escapeHtml(meta.title)}</h2>
+              <p class="chapter-objective">${escapeHtml(meta.objective)}</p>
+            </div>
+            <div class="level-step-tabs" aria-label="Investigation Chapters">
+              ${LEVEL_META.map(m => {
+                const isCurrent = m.num === state.level;
+                const isDone = state.completedLevels.includes(m.num);
+                const canGo = m.num <= state.level || isDone;
+                return `<button class="step-pill ${isCurrent ? "active" : ""} ${isDone && !isCurrent ? "completed" : ""}" data-top-level="${m.num}" ${canGo ? "" : "disabled style='opacity:0.38;cursor:not-allowed;'"}>Lv.${m.num}</button>`;
+              }).join("")}
+            </div>
+          </section>
+
+          <div id="level-stage">
+            ${renderLevelContent(state.level)}
+          </div>
+        </main>
+      `;
+
+      bindHudListeners();
+      bindLevelListeners(state.level);
+    }
+
+    function bindHudListeners() {
+      document.getElementById("hud-home-btn").addEventListener("click", () => {
+        saveGame(true);
+        state.started = false;
+        renderApp();
+      });
+      document.getElementById("open-evidence-btn").addEventListener("click", () => openDrawer("evidence"));
+      document.getElementById("open-board-btn").addEventListener("click", () => openDrawer("board"));
+      document.getElementById("open-timeline-btn").addEventListener("click", () => openDrawer("timeline"));
+      document.getElementById("open-notebook-btn").addEventListener("click", () => openDrawer("notebook"));
+      document.getElementById("open-hint-btn").addEventListener("click", openHintModal);
+      document.getElementById("hud-save-btn").addEventListener("click", () => saveGame(false));
+      document.getElementById("open-settings-btn").addEventListener("click", openSettingsModal);
+
+      document.querySelectorAll("[data-top-level]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const lv = Number(btn.dataset.top-level || btn.dataset.topLevel);
+          state.level = lv;
+          saveGame(true);
+          SoundEngine.pageTurn();
+          renderApp();
+        });
+      });
+    }
+
+    function completeLevelAndAdvance(lvNum, bonusPoints, unlockNote) {
+      if (!state.completedLevels.includes(lvNum)) {
+        state.completedLevels.push(lvNum);
+        state.score += bonusPoints;
+      }
+      addNotebookFact(unlockNote);
+      if (lvNum < 8 && state.level < lvNum + 1) {
+        state.level = lvNum + 1;
+      } else if (lvNum < 8) {
+        state.level = lvNum + 1;
+      }
+      saveGame(true);
+      SoundEngine.chime();
+      renderApp();
+      showToast(`Level ${lvNum} complete! Unlocked: ${unlockNote}`);
+    }
+
+    /* =======================================================================
+       LEVEL 1 – THE DISCOVERY
+       ======================================================================= */
+    function renderLevel1() {
+      const hotspots = [
+        { id: "ev_desk_cup", label: "Tea Cup", x: 52, y: 55, text: "A porcelain cup on the mahogany desk holds bitter wild-herb sediment—unusual for Ms. Eleanor's routine." },
+        { id: "ev_broken_clock", label: "Stopped Clock", x: 59, y: 53, text: "The brass desk clock stopped at 05:42 AM after falling onto the desk/rug edge." },
+        { id: "ev_window_latch", label: "Rain Window", x: 16, y: 36, text: "The high mullion window is unlatched in the rain, staged to suggest a weather slip." },
+        { id: "ev_audit_bookmark", label: "Audit Slip", x: 57, y: 58, text: "A torn ledger slip wedged in a book reads: 'Endowment Leak – Restricted Portal'." },
+        { id: "ev_missing_photo", label: "Missing Photo", x: 22, y: 69, text: "An empty silver frame sits on the side table—someone removed the photograph inside." }
+      ];
+
+      const suspiciousChoices = [
+        { id: "s1", label: "Bitter herbal sediment in the tea cup + 05:42 stopped clock", right: true },
+        { id: "s2", label: "Torn 'Endowment Leak – Restricted Portal' slip found near the desk", right: true },
+        { id: "s3", label: "Missing photograph from the silver frame & staged window latch", right: true },
+        { id: "s4", label: "The Old Library has bookshelves and a Persian rug", right: false }
+      ];
+
+      const activeInspectId = renderLevel1._inspectId || hotspots[0].id;
+      const activeSpot = hotspots.find(h => h.id === activeInspectId) || hotspots[0];
+      const allFound = hotspots.every(h => state.l1.inspected.includes(h.id));
+
+      return `
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="scene-container">
+            <div class="scene-viewport" id="l1-viewport">
+              <div class="scene-zoom-layer" id="l1-zoom-layer">
+                ${renderOldLibrarySceneSVG()}
+                ${hotspots.map(h => {
+                  const done = state.l1.inspected.includes(h.id);
+                  return `
+                    <button class="hotspot-btn ${done ? "inspected" : ""}" data-hotspot="${h.id}" style="left:${h.x}%;top:${h.y}%;" title="Inspect ${escapeHtml(h.label)}">
+                      <span class="hotspot-tag">${escapeHtml(h.label)}</span>
+                      <span class="hotspot-core"></span>
+                    </button>
+                  `;
+                }).join("")}
+              </div>
+            </div>
+            <div class="scene-toolbar">
+              <div style="font-size:0.84rem;color:var(--text-muted);">
+                🔍 Inspected: <strong style="color:var(--gold-light);">${state.l1.inspected.length}/5</strong> crime scene objects
+              </div>
+              <div style="display:flex;gap:0.4rem;">
+                <button class="btn-hud" id="l1-zoom-out">Zoom −</button>
+                <button class="btn-hud" id="l1-zoom-reset">100%</button>
+                <button class="btn-hud" id="l1-zoom-in">Zoom +</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-card" style="padding:1rem 1.2rem;">
+            <h3 style="color:var(--gold-light);font-size:1rem;">Inspection Lens: ${escapeHtml(activeSpot.label)}</h3>
+            <p style="margin-top:0.4rem;font-size:0.92rem;">${escapeHtml(activeSpot.text)}</p>
+          </div>
+
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;margin-bottom:0.65rem;">Initial Interviews with the Eight Friends</h3>
+            <div class="suspects-grid">
+              ${CHARACTERS.map(c => {
+                const talked = state.l1.talked.includes(c.id);
+                return `
+                  <div class="suspect-card ${talked ? "selected" : ""}">
+                    <div class="suspect-header">
+                      ${renderPortraitSVG(c.id)}
+                      <div>
+                        <div style="font-weight:700;font-size:0.9rem;color:var(--gold-light);">${escapeHtml(c.name)} (${c.age})</div>
+                        <div style="font-size:0.75rem;color:var(--gold);">${escapeHtml(c.archetype)}</div>
+                      </div>
+                    </div>
+                    <p style="font-size:0.82rem;color:var(--text-main);">“${escapeHtml(c.introLine)}”</p>
+                    <button class="btn-hud" data-l1-talk="${c.id}" style="align-self:flex-start;">${talked ? "✓ Spoke" : "Speak"}</button>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;">End-of-Level Challenge: Select 3 Suspicious Details</h3>
+            <p style="font-size:0.84rem;color:var(--text-muted);margin-bottom:0.75rem;">
+              ${allFound ? "All 5 crime scene objects examined! Choose the 3 genuine suspicious details to unlock the Crime Scene Investigation Board." : "Inspect all 5 objects in the Old Library first to enable final selection."}
+            </p>
+            <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem;">
+              ${suspiciousChoices.map(ch => {
+                const checked = state.l1.selectedSuspects.includes(ch.id);
+                return `
+                  <button class="difficulty-option ${checked ? "selected" : ""}" data-l1-choice="${ch.id}" ${allFound ? "" : "disabled"}>
+                    <span class="difficulty-name">${escapeHtml(ch.label)} <span>${checked ? "☑" : "☐"}</span></span>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+            <button class="btn-primary" id="l1-submit-btn" ${allFound && state.l1.selectedSuspects.length === 3 ? "" : "disabled"}>
+              Unlock Crime Scene Investigation Board →
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function bindLevel1() {
+      let zoom = 1;
+      const zoomLayer = document.getElementById("l1-zoom-layer");
+      const applyZoom = () => {
+        if (zoomLayer) zoomLayer.style.transform = `scale(${zoom})`;
+      };
+
+      document.getElementById("l1-zoom-in")?.addEventListener("click", () => {
+        zoom = Math.min(1.45, Number((zoom + 0.15).toFixed(2)));
+        applyZoom();
+      });
+      document.getElementById("l1-zoom-out")?.addEventListener("click", () => {
+        zoom = Math.max(1, Number((zoom - 0.15).toFixed(2)));
+        applyZoom();
+      });
+      document.getElementById("l1-zoom-reset")?.addEventListener("click", () => {
+        zoom = 1;
+        applyZoom();
+      });
+
+      document.querySelectorAll("[data-hotspot]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.hotspot;
+          renderLevel1._inspectId = id;
+          if (!state.l1.inspected.includes(id)) {
+            state.l1.inspected.push(id);
+            addEvidence(id);
+          } else {
+            SoundEngine.pageTurn();
+          }
+          renderApp();
+        });
+      });
+
+      document.querySelectorAll("[data-l1-talk]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const cid = btn.dataset.l1Talk;
+          if (!state.l1.talked.includes(cid)) {
+            state.l1.talked.push(cid);
+            state.score += 10;
+          }
+          const mem = getCharMem(cid);
+          mem.talkedCount += 1;
+          const ch = CHARACTERS.find(c => c.id === cid);
+          SoundEngine.pageTurn();
+          saveGame(true);
+          showToast(`${ch.name}: "${ch.introLine}"`);
+          renderApp();
+        });
+      });
+
+      document.querySelectorAll("[data-l1-choice]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.l1Choice;
+          const arr = state.l1.selectedSuspects;
+          if (arr.includes(id)) {
+            state.l1.selectedSuspects = arr.filter(x => x !== id);
+          } else if (arr.length < 3) {
+            arr.push(id);
+          } else {
+            showToast("Select up to 3 suspicious details (click one to unselect).");
+            return;
+          }
+          SoundEngine.pageTurn();
+          renderApp();
+        });
+      });
+
+      document.getElementById("l1-submit-btn")?.addEventListener("click", () => {
+        const sel = state.l1.selectedSuspects;
+        const ok = ["s1", "s2", "s3"].every(x => sel.includes(x));
+        if (ok) {
+          completeLevelAndAdvance(1, 100, "Crime Scene Investigation Board (bitter tea, stopped clock, audit slip & missing photo)");
+        } else {
+          state.wrongAccusations += 1;
+          state.score = Math.max(0, state.score - 20);
+          showToast("One of those choices isn't a suspicious crime-scene detail. Check the tea cup, stopped clock, audit slip, and missing photo.");
+          renderHudStatsOnly();
+        }
+      });
+    }
+
+    /* =======================================================================
+       LEVEL 2 – EIGHT STORIES, EIGHT ALIBIS
+       ======================================================================= */
+    function renderLevel2() {
+      const activeCharId = renderLevel2._activeChar || "tara";
+      const activeChar = CHARACTERS.find(c => c.id === activeCharId) || CHARACTERS[0];
+      const mem = getCharMem(activeChar.id);
+
+      const contradictionCandidates = [
+        { id: "c_tara", label: "Tara Sen — Claims 05:00–06:15 AM in AV/Server Room, but has a 35-min gap & clock edit" },
+        { id: "c_riya", label: "Riya Kulkarni — Initially held back walking past the library corridor after 05:40 AM" },
+        { id: "c_meera", label: "Meera Nair — Logged glasshouse humidity from 05:15–06:00 AM" },
+        { id: "c_aarohi", label: "Aarohi Verma — Checked East Hall stage cues from 05:25–06:05 AM" }
+      ];
+
+      return `
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;margin-bottom:0.65rem;">Individual Alibi Interviews (Click a Suspect)</h3>
+            <div class="suspects-grid" style="margin-bottom:1rem;">
+              ${CHARACTERS.map(c => `
+                <button class="suspect-card ${c.id === activeChar.id ? "selected" : ""}" data-l2-select-char="${c.id}">
+                  <div class="suspect-header">
+                    ${renderPortraitSVG(c.id)}
+                    <div>
+                      <div style="font-weight:700;font-size:0.88rem;color:var(--gold-light);">${escapeHtml(c.name)}</div>
+                      <div style="font-size:0.74rem;color:var(--text-muted);">${escapeHtml(c.archetype)}</div>
+                    </div>
+                  </div>
+                </button>
+              `).join("")}
+            </div>
+
+            <div class="dialogue-box">
+              <div class="dialogue-top">
+                ${renderPortraitSVG(activeChar.id, "large")}
+                <div style="flex:1;min-width:220px;">
+                  <div style="font-family:var(--font-display);font-size:1.1rem;color:var(--gold-light);">${escapeHtml(activeChar.name)} (${activeChar.age})</div>
+                  <div style="font-size:0.8rem;color:var(--gold);margin-bottom:0.35rem;">${escapeHtml(activeChar.archetype)} • Alibi: ${escapeHtml(activeChar.alibi)}</div>
+                  ${mem.accusedEarly ? `<div style="font-size:0.78rem;color:#fca5a5;">⚠ Remembers being pressed/accused earlier in the investigation.</div>` : ""}
+                </div>
+              </div>
+              <div class="dialogue-speech">
+                “${escapeHtml(mem.pressed ? activeChar.pressLine : activeChar.introLine)}”
+              </div>
+              <div class="dialogue-choices">
+                <button class="choice-btn" id="l2-press-btn">Press on Dawn Alibi & Timing</button>
+                <button class="choice-btn" id="l2-flag-sus-btn">${mem.accusedEarly ? "Marked as Suspicious" : "Flag Alibi as Questionable"}</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;margin-bottom:0.35rem;">Interactive Academy Floor Map</h3>
+            <p style="font-size:0.84rem;color:var(--text-muted);margin-bottom:0.85rem;">
+              Drag a suspect badge onto a room (or click a suspect and click a room) to verify where everyone was around 05:30–06:00 AM.
+            </p>
+            <div class="floor-map-grid">
+              ${ROOMS.map(room => {
+                const occupants = CHARACTERS.filter(c => state.l2.placements[c.id] === room.id);
+                return `
+                  <div class="room-zone" data-drop-room="${room.id}">
+                    <div>
+                      <div class="room-title">${escapeHtml(room.name)}</div>
+                      <div class="room-time">${escapeHtml(room.time)}</div>
+                    </div>
+                    <div>
+                      ${occupants.map(occ => `
+                        <span class="placed-token" draggable="true" data-drag-char="${occ.id}" title="Drag to another room">
+                          ${escapeHtml(occ.name.split(" ")[0])}
+                        </span>
+                      `).join("")}
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+          </div>
+
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;">End-of-Level Challenge: Pinpoint 2 Inconsistent Alibis</h3>
+            <p style="font-size:0.84rem;color:var(--text-muted);margin-bottom:0.75rem;">
+              Select the 2 girls whose alibis show clear friction or gaps once compared against the dawn timeline.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem;">
+              ${contradictionCandidates.map(item => {
+                const active = state.l2.selectedAlibiContradictions.includes(item.id);
+                return `
+                  <button class="difficulty-option ${active ? "selected" : ""}" data-l2-contra="${item.id}">
+                    <span class="difficulty-name">${escapeHtml(item.label)} <span>${active ? "☑" : "☐"}</span></span>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+            <button class="btn-primary" id="l2-submit-btn" ${state.l2.selectedAlibiContradictions.length === 2 ? "" : "disabled"}>
+              Unlock Suspect Timeline →
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function bindLevel2() {
+      document.querySelectorAll("[data-l2-select-char]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          renderLevel2._activeChar = btn.dataset.l2SelectChar;
+          SoundEngine.pageTurn();
+          renderApp();
+        });
+      });
+
+      const activeId = renderLevel2._activeChar || "tara";
+      document.getElementById("l2-press-btn")?.addEventListener("click", () => {
+        const mem = getCharMem(activeId);
+        mem.pressed = true;
+        mem.talkedCount += 1;
+        state.score += 10;
+        SoundEngine.pageTurn();
+        saveGame(true);
+        renderApp();
+      });
+
+      document.getElementById("l2-flag-sus-btn")?.addEventListener("click", () => {
+        const mem = getCharMem(activeId);
+        mem.accusedEarly = true;
+        const ch = CHARACTERS.find(c => c.id === activeId);
+        addNotebookFact(`Pressed/flagged ${ch.name} during alibi check—she will remember this in later conversations.`);
+        SoundEngine.chime();
+        saveGame(true);
+        showToast(`Noted suspicion toward ${ch.name}. She will remember your questioning.`);
+        renderApp();
+      });
+
+      let draggedChar = null;
+      document.querySelectorAll("[data-drag-char]").forEach(tok => {
+        tok.addEventListener("dragstart", e => {
+          draggedChar = tok.dataset.dragChar;
+          if (e.dataTransfer) e.dataTransfer.setData("text/plain", draggedChar);
+        });
+        tok.addEventListener("click", e => {
+          e.stopPropagation();
+          draggedChar = tok.dataset.dragChar;
+          showToast(`Selected ${draggedChar}. Tap a room card to move.`);
+        });
+      });
+
+      document.querySelectorAll("[data-drop-room]").forEach(zone => {
+        zone.addEventListener("dragover", e => {
+          e.preventDefault();
+          zone.classList.add("drag-over");
+        });
+        zone.addEventListener("dragleave", () => zone.classList.remove("drag-over"));
+        zone.addEventListener("drop", e => {
+          e.preventDefault();
+          zone.classList.remove("drag-over");
+          const cid = draggedChar || (e.dataTransfer && e.dataTransfer.getData("text/plain"));
+          if (cid) {
+            state.l2.placements[cid] = zone.dataset.dropRoom;
+            SoundEngine.footstep();
+            saveGame(true);
+            renderApp();
+          }
+        });
+        zone.addEventListener("click", () => {
+          if (draggedChar) {
+            state.l2.placements[draggedChar] = zone.dataset.dropRoom;
+            draggedChar = null;
+            SoundEngine.footstep();
+            saveGame(true);
+            renderApp();
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-l2-contra]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.l2Contra;
+          const arr = state.l2.selectedAlibiContradictions;
+          if (arr.includes(id)) {
+            state.l2.selectedAlibiContradictions = arr.filter(x => x !== id);
+          } else if (arr.length < 2) {
+            arr.push(id);
+          } else {
+            showToast("Choose 2 alibis (click one to swap).");
+            return;
+          }
+          SoundEngine.pageTurn();
+          renderApp();
+        });
+      });
+
+      document.getElementById("l2-submit-btn")?.addEventListener("click", () => {
+        const sel = state.l2.selectedAlibiContradictions;
+        if (sel.includes("c_tara") && sel.includes("c_riya")) {
+          addEvidence("ev_alibi_map_report");
+          completeLevelAndAdvance(2, 110, "Suspect Timeline (Tara's AV room gap & Riya's corridor pass mapped)");
+        } else {
+          state.wrongAccusations += 1;
+          state.score = Math.max(0, state.score - 20);
+          showToast("Look closer at who had an unexplained gap/edit and who held back walking past the library corridor.");
+          renderHudStatsOnly();
+        }
+      });
+    }
+
+    /* =======================================================================
+       LEVEL 3 – SECRETS IN THE DIARY
+       ======================================================================= */
+    function caesarShift(text, shift) {
+      return text.replace(/[A-Z]/g, ch => {
+        const code = ch.charCodeAt(0) - 65;
+        return String.fromCharCode(((code + shift + 26) % 26) + 65);
+      });
+    }
+
+    function renderLevel3() {
+      const secretOptions = [
+        { id: "sec_tara", label: "Tara accessed restricted endowment audit files & had family ties to a tech portal leak", trueSecret: true },
+        { id: "sec_riya", label: "Riya argued over her mural and borrowed the library brass key earlier", trueSecret: false },
+        { id: "sec_meera", label: "Meera brewed unauthorized wild-herb teas in the glasshouse after curfew", trueSecret: true },
+        { id: "sec_kavya", label: "Kavya worried Ms. Eleanor would flag uncredited citation notes in her essay", trueSecret: true }
+      ];
+
+      return `
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;">Step A: Concealed Leather Diary & Cipher</h3>
+            <p style="font-size:0.86rem;color:var(--text-muted);margin-top:0.25rem;">
+              Search behind the loose archival shelf panel to recover Ms. Eleanor's diary, then decode the shifted note.
+            </p>
+            <div style="margin-top:0.8rem;display:flex;flex-wrap:wrap;gap:0.75rem;align-items:center;">
+              <button class="btn-gold" id="l3-find-diary-btn" ${state.l3.diaryFound ? "disabled" : ""}>
+                ${state.l3.diaryFound ? "✓ Leather Diary Recovered" : "Search Behind Archival Shelf"}
+              </button>
+            </div>
+
+            ${state.l3.diaryFound ? `
+              <div style="margin-top:1rem;background:rgba(7,11,20,0.8);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:1rem;">
+                <div style="font-size:0.8rem;color:var(--gold);">ENCRYPTED NOTE (Shift -3 back to A–Z, or enter/apply decoded phrase):</div>
+                <div style="font-family:monospace;font-size:1.05rem;color:#f3d27a;margin:0.45rem 0;letter-spacing:0.06em;">
+                  SRUWDO EUHDF IRXQG — VFKRODUVKLS OHGJHU FRSLHG — VSHDN DW GDZQ
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.65rem;">
+                  <button class="btn-secondary" id="l3-decode-btn">Apply Cipher Decoder (-3 Shift)</button>
+                </div>
+                ${state.l3.cipherSolved ? `
+                  <div style="margin-top:0.75rem;padding:0.75rem;border-left:3px solid #4ade80;background:rgba(46,160,115,0.14);font-size:0.9rem;">
+                    <strong>Decoded Message:</strong> “PORTAL BREACH FOUND — SCHOLARSHIP LEDGER COPIED — SPEAK AT DAWN”
+                  </div>
+                ` : ""}
+              </div>
+            ` : ""}
+          </div>
+
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;">Step B: Identify Three True Character Secrets</h3>
+            <p style="font-size:0.84rem;color:var(--text-muted);margin-bottom:0.75rem;">
+              ${state.l3.cipherSolved ? "Select the 3 true secrets uncovered from the diary and private notes." : "Recover and decode the diary message above first."}
+            </p>
+            <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1rem;">
+              ${secretOptions.map(opt => {
+                const picked = state.l3.selectedSecrets.includes(opt.id);
+                return `
+                  <button class="difficulty-option ${picked ? "selected" : ""}" data-l3-secret="${opt.id}" ${state.l3.cipherSolved ? "" : "disabled"}>
+                    <span class="difficulty-name">${escapeHtml(opt.label)} <span>${picked ? "☑" : "☐"}</span></span>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+            <button class="btn-primary" id="l3-submit-btn" ${state.l3.cipherSolved && state.l3.selectedSecrets.length === 3 ? "" : "disabled"}>
+              Unlock Relationship Map →
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function bindLevel3() {
+      document.getElementById("l3-find-diary-btn")?.addEventListener("click", () => {
+        state.l3.diaryFound = true;
+        addEvidence("ev_hidden_diary");
+        SoundEngine.pageTurn();
+        saveGame(true);
+        showToast("Found Ms. Eleanor's concealed leather diary behind the shelf!");
+        renderApp();
+      });
+
+      document.getElementById("l3-decode-btn")?.addEventListener("click", () => {
+        const cipher = "SRUWDO EUHDF IRXQG — VFKRODUVKLS OHGJHU FRSLHG — VSHDN DW GDZQ";
+        const plain = caesarShift(cipher, -3);
+        if (plain.includes("PORTAL BREACH FOUND")) {
+          state.l3.cipherSolved = true;
+          addEvidence("ev_decoded_cipher");
+          SoundEngine.chime();
+          saveGame(true);
+          renderApp();
+        }
+      });
+
+      document.querySelectorAll("[data-l3-secret]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.l3Secret;
+          const arr = state.l3.selectedSecrets;
+          if (arr.includes(id)) {
+            state.l3.selectedSecrets = arr.filter(x => x !== id);
+          } else if (arr.length < 3) {
+            arr.push(id);
+          } else {
+            showToast("Choose 3 secrets.");
+            return;
+          }
+          SoundEngine.pageTurn();
+          renderApp();
+        });
+      });
+
+      document.getElementById("l3-submit-btn")?.addEventListener("click", () => {
+        const sel = state.l3.selectedSecrets;
+        const ok = ["sec_tara", "sec_meera", "sec_kavya"].every(x => sel.includes(x));
+        if (ok) {
+          completeLevelAndAdvance(3, 120, "Relationship Map (scholarship portal secret, wild-herb notes & citation tension)");
+        } else {
+          state.wrongAccusations += 1;
+          state.score = Math.max(0, state.score - 20);
+          showToast("Check the diary and secrets carefully—one of those options isn't one of the three target secrets.");
+          renderHudStatsOnly();
+        }
+      });
+    }
+
+    /* =======================================================================
+       LEVEL 4 – THE NIGHT OF THE INCIDENT
+       ======================================================================= */
+    const CANONICAL_L4_ORDER = ["e_tea", "e_clock_edit", "e_cardiac", "e_riya_pass", "e_frame_removed", "e_discovery"];
+
+    function renderLevel4() {
+      return `
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;">Digital Clock Sync & Brass Key Audit</h3>
+            <p style="font-size:0.86rem;color:var(--text-muted);margin-top:0.25rem;">
+              Inspect the terminal clock-offset log and the brass key record before ordering the six events from earliest (#1) to latest (#6).
+            </p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.65rem;margin-top:0.8rem;">
+              <button class="btn-secondary" id="l4-inspect-cctv">Inspect Clock-Sync & Server Log</button>
+              <button class="btn-secondary" id="l4-inspect-key">Inspect Brass Key & Lock Log</button>
+            </div>
+          </div>
+
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;margin-bottom:0.65rem;">Chronological Ordering Challenge (Drag or Use Move Buttons)</h3>
+            <div class="timeline-list" id="l4-timeline-list">
+              ${state.l4.events.map((ev, idx) => `
+                <div class="timeline-item" draggable="true" data-l4-idx="${idx}">
+                  <div style="display:flex;align-items:center;gap:0.75rem;flex:1;min-width:220px;">
+                    <span style="background:var(--gold);color:#141006;font-weight:800;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:0.82rem;flex-shrink:0;">${idx + 1}</span>
+                    <span style="font-size:0.88rem;">${escapeHtml(ev.label)}</span>
+                  </div>
+                  <div style="display:flex;gap:0.35rem;">
+                    <button class="btn-hud" data-move-up="${idx}" ${idx === 0 ? "disabled" : ""}>▲</button>
+                    <button class="btn-hud" data-move-down="${idx}" ${idx === state.l4.events.length - 1 ? "disabled" : ""}>▼</button>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+            <div style="margin-top:1.1rem;">
+              <button class="btn-primary" id="l4-submit-btn">Verify Sequence & Unlock Master Timeline →</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function bindLevel4() {
+      document.getElementById("l4-inspect-cctv")?.addEventListener("click", () => {
+        addEvidence("ev_cctv_sync");
+        showToast("Log reveals a +35-minute clock-sync edit sent from the AV/Server terminal.");
+        renderHudStatsOnly();
+      });
+      document.getElementById("l4-inspect-key")?.addEventListener("click", () => {
+        addEvidence("ev_brass_key_trail");
+        showToast("Key log shows Riya's brass key was returned and wasn't the sole access point.");
+        renderHudStatsOnly();
+      });
+
+      const swapItems = (a, b) => {
+        if (a < 0 || b < 0 || a >= state.l4.events.length || b >= state.l4.events.length) return;
+        const copy = [...state.l4.events];
+        const temp = copy[a];
+        copy[a] = copy[b];
+        copy[b] = temp;
+        state.l4.events = copy;
+        SoundEngine.pageTurn();
+        saveGame(true);
+        renderApp();
+      };
+
+      document.querySelectorAll("[data-move-up]").forEach(btn => {
+        btn.addEventListener("click", () => swapItems(Number(btn.dataset.moveUp), Number(btn.dataset.moveUp) - 1));
+      });
+      document.querySelectorAll("[data-move-down]").forEach(btn => {
+        btn.addEventListener("click", () => swapItems(Number(btn.dataset.moveDown), Number(btn.dataset.moveDown) + 1));
+      });
+
+      let dragSrc = null;
+      document.querySelectorAll("[data-l4-idx]").forEach(row => {
+        row.addEventListener("dragstart", () => {
+          dragSrc = Number(row.dataset.l4Idx);
+          row.classList.add("dragging");
+        });
+        row.addEventListener("dragend", () => row.classList.remove("dragging"));
+        row.addEventListener("dragover", e => e.preventDefault());
+        row.addEventListener("drop", () => {
+          const targetIdx = Number(row.dataset.l4Idx);
+          if (dragSrc !== null && dragSrc !== targetIdx) {
+            swapItems(dragSrc, targetIdx);
+          }
+          dragSrc = null;
+        });
+      });
+
+      document.getElementById("l4-submit-btn")?.addEventListener("click", () => {
+        const currentIds = state.l4.events.map(e => e.id);
+        const exactMatch = currentIds.every((id, i) => id === CANONICAL_L4_ORDER[i]);
+        if (exactMatch) {
+          addEvidence("ev_cctv_sync");
+          completeLevelAndAdvance(4, 130, "Master Timeline (6-step sequence & +35-minute clock-sync manipulation verified)");
+        } else {
+          state.wrongAccusations += 1;
+          state.score = Math.max(0, state.score - 20);
+          showToast("The order isn't quite right yet. Remember: tea & clock edit happen before the ~05:45 AM fall, and discovery happens at ~06:20 AM.");
+          renderHudStatsOnly();
+        }
+      });
+    }
+
+    /* =======================================================================
+       LEVEL 5 – THE FALSE TRAIL
+       ======================================================================= */
+    function renderLevel5() {
+      const items = [
+        {
+          id: "f_photo",
+          title: "Cloister Snapshot Showing Nandini Near Library",
+          desc: "Sharp contrast seam around Nandini's silhouette and EXIF timestamp offset—edited to make her look guilty over her secret family-letter meeting.",
+          verdict: "false"
+        },
+        {
+          id: "f_note",
+          title: "Anonymous Tablet Draft Pointing Only at Botany Tea",
+          desc: "Left open on a shared device to push everyone toward Meera's herbs while ignoring server/clock edits.",
+          verdict: "false"
+        },
+        {
+          id: "f_sync",
+          title: "AV/Server Terminal +35-Min Clock-Sync Log",
+          desc: "System log matching the digital/wall clock shift with Tara's unlogged window.",
+          verdict: "true"
+        },
+        {
+          id: "f_audit",
+          title: "Torn 'Endowment Leak – Restricted Portal' Slip",
+          desc: "Physical slip found in the Old Library tied to Ms. Eleanor's final notes.",
+          verdict: "true"
+        }
+      ];
+
+      const allClassified = items.every(i => state.l5.verifiedAuthentic.includes(i.id) || state.l5.flaggedFalse.includes(i.id));
+
+      return `
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;">Separate Authentic Clues from Planted / Doctored Evidence</h3>
+            <p style="font-size:0.86rem;color:var(--text-muted);margin-top:0.25rem;">
+              Someone doctored a photo to frame Nandini Rao and planted a finger-pointing draft. Mark each item below as <strong>Authentic</strong> or <strong>Planted / False Trail</strong>.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:1rem;">
+              ${items.map(it => {
+                const isAuth = state.l5.verifiedAuthentic.includes(it.id);
+                const isFalse = state.l5.flaggedFalse.includes(it.id);
+                return `
+                  <div class="panel-card" style="padding:0.95rem;background:var(--bg-navy);">
+                    <div style="font-weight:700;color:var(--gold-light);">${escapeHtml(it.title)}</div>
+                    <p style="font-size:0.84rem;color:var(--text-muted);margin:0.3rem 0 0.7rem;">${escapeHtml(it.desc)}</p>
+                    <div style="display:flex;gap:0.5rem;">
+                      <button class="btn-hud ${isAuth ? "active-tab" : ""}" data-l5-mark="${it.id}|true">Authentic Clue</button>
+                      <button class="btn-hud ${isFalse ? "active-tab" : ""}" data-l5-mark="${it.id}|false">Planted / False Trail</button>
+                    </div>
+                  </div>
+                `;
+              }).join("")}
+            </div>
+            <div style="margin-top:1.1rem;">
+              <button class="btn-primary" id="l5-submit-btn" ${allClassified ? "" : "disabled"}>
+                Verify Evidence & Unlock Verification System →
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function bindLevel5() {
+      document.querySelectorAll("[data-l5-mark]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const [id, choice] = btn.dataset.l5Mark.split("|");
+          state.l5.verifiedAuthentic = state.l5.verifiedAuthentic.filter(x => x !== id);
+          state.l5.flaggedFalse = state.l5.flaggedFalse.filter(x => x !== id);
+          if (choice === "true") state.l5.verifiedAuthentic.push(id);
+          else state.l5.flaggedFalse.push(id);
+          SoundEngine.pageTurn();
+          saveGame(true);
+          renderApp();
+        });
+      });
+
+      document.getElementById("l5-submit-btn")?.addEventListener("click", () => {
+        const rightAuth = state.l5.verifiedAuthentic.includes("f_sync") && state.l5.verifiedAuthentic.includes("f_audit");
+        const rightFalse = state.l5.flaggedFalse.includes("f_photo") && state.l5.flaggedFalse.includes("f_note");
+        if (rightAuth && rightFalse) {
+          addEvidence("ev_doctored_photo");
+          addEvidence("ev_planted_note");
+          completeLevelAndAdvance(5, 130, "Evidence Verification System (Nandini cleared of doctored photo; false trail exposed)");
+        } else {
+          state.wrongAccusations += 1;
+          state.score = Math.max(0, state.score - 20);
+          showToast("Re-check which items were edited/planted to misdirect the group vs. backed by system/library records.");
+          renderHudStatsOnly();
+        }
+      });
+    }
+
+    /* =======================================================================
+       LEVEL 6 – THE SECRET CONNECTION
+       ======================================================================= */
+    function renderLevel6() {
+      const statements = [
+        {
+          id: "st_tara_av",
+          speaker: "Tara Sen",
+          quote: "“I was in the Server/AV Room calibrating projectors the whole time—nothing unusual happened on my console.”",
+          isSuspicious: true
+        },
+        {
+          id: "st_tara_neutral",
+          speaker: "Tara Sen",
+          quote: "“Maybe Riya's temper or Meera's tea is what we should focus on first.”",
+          isSuspicious: true
+        },
+        {
+          id: "st_meera_herbs",
+          speaker: "Meera Nair",
+          quote: "“I was logging glasshouse humidity from 05:15–06:00 AM and brewed valerian for my own insomnia.”",
+          isSuspicious: false
+        },
+        {
+          id: "st_nandini_letter",
+          speaker: "Nandini Rao",
+          quote: "“Ms. Eleanor and I spoke about an old letter tied to my family—not a server breach.”",
+          isSuspicious: false
+        }
+      ];
+
+      return `
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;">The Scholarship Endowment Audit Revelation</h3>
+            <p style="font-size:0.9rem;margin-top:0.4rem;">
+              Archival notes show Ms. Eleanor had discovered an unauthorized query from a tech consultancy linked to <strong>Tara Sen's family</strong> into restricted festival scholarship & endowment audit files. She had planned to report the breach before the festival awards—putting Tara's scholarship and family standing at risk.
+            </p>
+            <div style="margin-top:0.75rem;">
+              <button class="btn-gold" id="l6-collect-memo">Log Scholarship Audit Memo</button>
+            </div>
+          </div>
+
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;margin-bottom:0.35rem;">Revisit Statements: Which Now Ring False or Self-Serving?</h3>
+            <p style="font-size:0.84rem;color:var(--text-muted);margin-bottom:0.75rem;">
+              Select the <strong>2 statements</strong> that now look suspicious in light of Tara's motive and the clock-sync edit.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:0.55rem;margin-bottom:1rem;">
+              ${statements.map(st => {
+                const picked = state.l6.flaggedStatements.includes(st.id);
+                return `
+                  <button class="difficulty-option ${picked ? "selected" : ""}" data-l6-st="${st.id}">
+                    <span class="difficulty-name">${escapeHtml(st.speaker)} <span>${picked ? "☑" : "☐"}</span></span>
+                    <span class="difficulty-desc">${escapeHtml(st.quote)}</span>
+                  </button>
+                `;
+              }).join("")}
+            </div>
+            <button class="btn-primary" id="l6-submit-btn" ${state.l6.flaggedStatements.length === 2 ? "" : "disabled"}>
+              Connect Motive, Opportunity & Evidence →
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function bindLevel6() {
+      document.getElementById("l6-collect-memo")?.addEventListener("click", () => {
+        addEvidence("ev_scholarship_memo");
+        showToast("Logged Scholarship Audit & Consultancy File.");
+        renderHudStatsOnly();
+      });
+
+      document.querySelectorAll("[data-l6-st]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.l6St;
+          const arr = state.l6.flaggedStatements;
+          if (arr.includes(id)) {
+            state.l6.flaggedStatements = arr.filter(x => x !== id);
+          } else if (arr.length < 2) {
+            arr.push(id);
+          } else {
+            showToast("Select 2 statements.");
+            return;
+          }
+          SoundEngine.pageTurn();
+          renderApp();
+        });
+      });
+
+      document.getElementById("l6-submit-btn")?.addEventListener("click", () => {
+        const sel = state.l6.flaggedStatements;
+        if (sel.includes("st_tara_av") && sel.includes("st_tara_neutral")) {
+          addEvidence("ev_scholarship_memo");
+          completeLevelAndAdvance(6, 140, "Final Suspect Analysis (Tara's scholarship motive & misleading steering identified)");
+        } else {
+          state.wrongAccusations += 1;
+          state.score = Math.max(0, state.score - 20);
+          showToast("Look at which statements try to keep attention away from the AV/Server console and scholarship audit.");
+          renderHudStatsOnly();
+        }
+      });
+    }
+
+    /* =======================================================================
+       LEVEL 7 – THE FINAL CONFRONTATION (INCLUDING TWIST WITHIN THE TWIST)
+       ======================================================================= */
+    function renderLevel7() {
+      const proof = state.l7.proofChain;
+      const readyToAccuse = proof.motive && proof.opportunity && proof.contradiction && proof.clue;
+
+      return `
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="panel-card" style="padding:1.15rem;border-color:var(--gold);">
+            <h3 style="color:var(--gold-light);font-size:1.1rem;">Common Room Gathering & Twist Within the Twist</h3>
+            <p style="font-size:0.88rem;margin-top:0.35rem;">
+              All eight girls gather in the academy's Common Room as the hill-station rain lashes the panes. Before naming the culprit, examine how clues were paced: <strong>Tara Sen</strong> didn't merely hide her own tracks—she subtly steered early focus toward red herrings (murals, herbs, and a doctored photo) while controlling when digital/audit clues surfaced.
+            </p>
+            <div style="margin-top:0.75rem;">
+              <button class="btn-gold" id="l7-reveal-twist-btn">${state.l7.twistRevealed ? "✓ Clue-Curation Twist Logged" : "Uncover Clue-Curation Twist"}</button>
+            </div>
+          </div>
+
+          <div class="panel-card" style="padding:1.15rem;">
+            <h3 style="color:var(--gold-light);font-size:1.05rem;margin-bottom:0.65rem;">Build Your Four-Part Proof Chain</h3>
+            <p style="font-size:0.84rem;color:var(--text-muted);margin-bottom:0.85rem;">
+              Prove the case logically by selecting one verified item for each pillar: <strong>Motive</strong>, <strong>Opportunity</strong>, <strong>Contradiction</strong>, and <strong>Physical/Digital Clue</strong>.
+            </p>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:0.85rem;">
+              <div>
+                <label style="display:block;font-size:0.8rem;color:var(--gold);margin-bottom:0.3rem;">1. Motive</label>
+                <select id="l7-motive" style="width:100%;padding:0.55rem;border-radius:var(--radius-sm);background:var(--bg-navy);color:var(--text-main);border:1px solid var(--border-subtle);">
+                  <option value="">-- Choose Motive --</option>
+                  <option value="scholarship_breach" ${proof.motive === "scholarship_breach" ? "selected" : ""}>Preventing exposure of a leaked scholarship & endowment audit</option>
+                  <option value="mural_pride" ${proof.mural_pride === "mural_pride" || proof.motive === "mural_pride" ? "selected" : ""}>Anger over moving a festival mural</option>
+                  <option value="essay_notes" ${proof.motive === "essay_notes" ? "selected" : ""}>Worrying over essay citation notes</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="display:block;font-size:0.8rem;color:var(--gold);margin-bottom:0.3rem;">2. Opportunity</label>
+                <select id="l7-opportunity" style="width:100%;padding:0.55rem;border-radius:var(--radius-sm);background:var(--bg-navy);color:var(--text-main);border:1px solid var(--border-subtle);">
+                  <option value="">-- Choose Opportunity --</option>
+                  <option value="av_console_edit" ${proof.opportunity === "av_console_edit" ? "selected" : ""}>Access to AV/Server console & unlogged 35-min window</option>
+                  <option value="stage_fuse" ${proof.opportunity === "stage_fuse" ? "selected" : ""}>Bypassing a stage lighting breaker in East Hall</option>
+                  <option value="family_letter" ${proof.opportunity === "family_letter" ? "selected" : ""}>Discussing a family letter near the cloister</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="display:block;font-size:0.8rem;color:var(--gold);margin-bottom:0.3rem;">3. Contradiction</label>
+                <select id="l7-contradiction" style="width:100%;padding:0.55rem;border-radius:var(--radius-sm);background:var(--bg-navy);color:var(--text-main);border:1px solid var(--border-subtle);">
+                  <option value="">-- Choose Contradiction --</option>
+                  <option value="clock_offset_vs_alibi" ${proof.contradiction === "clock_offset_vs_alibi" ? "selected" : ""}>+35-min clock-sync edit conflicts with continuous AV alibi</option>
+                  <option value="tea_cup_vs_rug" ${proof.contradiction === "tea_cup_vs_rug" ? "selected" : ""}>Persian rug color vs. wall height</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="display:block;font-size:0.8rem;color:var(--gold);margin-bottom:0.3rem;">4. Supporting Evidence</label>
+                <select id="l7-clue" style="width:100%;padding:0.55rem;border-radius:var(--radius-sm);background:var(--bg-navy);color:var(--text-main);border:1px solid var(--border-subtle);">
+                  <option value="">-- Choose Clue --</option>
+                  <option value="audit_and_sync_logs" ${proof.clue === "audit_and_sync_logs" ? "selected" : ""}>Torn Audit Slip + Decoded Cipher + Server Clock-Sync Log</option>
+                  <option value="doctored_photo_only" ${proof.clue === "doctored_photo_only" ? "selected" : ""}>Doctored photo framing Nandini</option>
+                </select>
+              </div>
+            </div>
+
+            <h4 style="color:var(--gold-light);font-size:0.95rem;margin:1.1rem 0 0.55rem;">Select the Suspect You Are Accusing</h4>
+            <div class="suspects-grid" style="margin-bottom:1rem;">
+              ${CHARACTERS.map(c => `
+                <button class="suspect-card ${state.l7.accusedSuspectId === c.id ? "selected" : ""}" data-l7-accuse="${c.id}">
+                  <div class="suspect-header">
+                    ${renderPortraitSVG(c.id)}
+                    <div>
+                      <div style="font-weight:700;font-size:0.86rem;color:var(--gold-light);">${escapeHtml(c.name)}</div>
+                      <div style="font-size:0.72rem;color:var(--text-muted);">${escapeHtml(c.archetype)}</div>
+                    </div>
+                  </div>
+                </button>
+              `).join("")}
+            </div>
+
+            ${state.l7.feedbackMsg ? `
+              <div style="padding:0.8rem 1rem;border-radius:var(--radius-sm);background:rgba(201,59,75,0.18);border:1px solid var(--danger);color:#fecaca;font-size:0.88rem;margin-bottom:0.9rem;">
+                ${escapeHtml(state.l7.feedbackMsg)}
+              </div>
+            ` : ""}
+
+            <button class="btn-primary" id="l7-submit-accusation" ${readyToAccuse && state.l7.accusedSuspectId ? "" : "disabled"}>
+              Present Proof & Confront Suspect →
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function bindLevel7() {
+      document.getElementById("l7-reveal-twist-btn")?.addEventListener("click", () => {
+        state.l7.twistRevealed = true;
+        addEvidence("ev_clue_curation_log");
+        SoundEngine.dramaSwell();
+        saveGame(true);
+        showToast("Twist within the twist uncovered: Tara curated clue pacing to keep red herrings active.");
+        renderApp();
+      });
+
+      ["l7-motive", "l7-opportunity", "l7-contradiction", "l7-clue"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("change", () => {
+            state.l7.proofChain.motive = document.getElementById("l7-motive").value;
+            state.l7.proofChain.opportunity = document.getElementById("l7-opportunity").value;
+            state.l7.proofChain.contradiction = document.getElementById("l7-contradiction").value;
+            state.l7.proofChain.clue = document.getElementById("l7-clue").value;
+            saveGame(true);
+            renderApp();
+          });
+        }
+      });
+
+      document.querySelectorAll("[data-l7-accuse]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.l7.accusedSuspectId = btn.dataset.l7Accuse;
+          SoundEngine.pageTurn();
+          saveGame(true);
+          renderApp();
+        });
+      });
+
+      document.getElementById("l7-submit-accusation")?.addEventListener("click", () => {
+        const p = state.l7.proofChain;
+        const validChain =
+          p.motive === "scholarship_breach" &&
+          p.opportunity === "av_console_edit" &&
+          p.contradiction === "clock_offset_vs_alibi" &&
+          p.clue === "audit_and_sync_logs";
+
+        if (state.l7.accusedSuspectId === "tara" && validChain) {
+          state.l7.feedbackMsg = "";
+          completeLevelAndAdvance(7, 180, "Final Revelation (Tara Sen proven guilty with complete 4-part chain of evidence)");
+        } else {
+          state.wrongAccusations += 1;
+          state.score = Math.max(0, state.score - 30);
+          const chosen = CHARACTERS.find(c => c.id === state.l7.accusedSuspectId);
+          state.l7.feedbackMsg =
+            state.l7.accusedSuspectId !== "tara"
+              ? `${chosen ? chosen.name : "That suspect"} has an explanation or alibi that doesn't match the clock-sync edit and scholarship audit trail. Re-examine your evidence and try again.`
+              : "Your suspect choice is on track, but one or more links in your four-part proof chain don't match the verified evidence yet. Adjust your chain and try again.";
+          SoundEngine.thunder();
+          saveGame(true);
+          renderApp();
+        }
+      });
+    }
+
+    /* =======================================================================
+       LEVEL 8 – THE LAST SECRET (CONFRONTATION, BREAKDOWN, EPILOGUE & CERT)
+       ======================================================================= */
+    function renderLevel8() {
+      const step = state.l8.confrontationStep;
+      const tara = CHARACTERS.find(c => c.id === "tara");
+      const diffMult = STORY_BIBLE.difficulties[state.difficulty]?.scoreMultiplier || 1;
+      const finalScore = Math.round(state.score * diffMult);
+      const rank =
+        finalScore >= 750 ? "Master Hillcrest Sleuth" :
+        finalScore >= 520 ? "Senior Academy Investigator" :
+        "Junior Detective of St. Jude";
+
+      const steps = [
+        {
+          title: "Step 1: Initial Denial",
+          speech: "“Me? A murderer? You're letting stress run away with you, Detective. I helped check the logs—why would I sabotage anything?”"
+        },
+        {
+          title: "Step 2: Cornered by the Clock & Audit Trail",
+          speech: "“You... you traced the +35-minute clock-sync edit back to the AV terminal? And you found Ms. Eleanor's note on the scholarship endowment leak?”"
+        },
+        {
+          title: "Step 3: The Full Truth & Clue Curation",
+          speech: "“Ms. Eleanor was going to report the scholarship data leak before the festival awards. If that broke, my scholarship and my family's firm would be ruined. So I slipped monkshood extract into her tea, staged the fall, shifted the clock log, and nudged everyone toward murals and herbs so nobody would look at the audit files until too late...”"
+        }
+      ];
+
+      const curStep = steps[Math.min(step, steps.length - 1)];
+
+      return `
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="dialogue-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+              <span class="chapter-kicker">Final Confrontation — ${escapeHtml(curStep.title)}</span>
+              <span style="font-size:0.78rem;color:var(--gold);">Culprit Exposed: Tara Sen (The Tech Expert)</span>
+            </div>
+            <div class="dialogue-top">
+              ${renderPortraitSVG(tara.id, "large")}
+              <div style="flex:1;min-width:220px;">
+                <h3 style="color:var(--gold-light);font-size:1.15rem;">${escapeHtml(tara.name)} (${tara.age})</h3>
+                <div style="font-size:0.8rem;color:#fca5a5;">${escapeHtml(tara.archetype)} • Secret Antagonist</div>
+              </div>
+            </div>
+            <div class="dialogue-speech">“${escapeHtml(curStep.speech)}”</div>
+            <div style="display:flex;flex-wrap:wrap;gap:0.6rem;">
+              ${step < 2 ? `
+                <button class="btn-primary" id="l8-next-confrontation">Present Irrefutable Evidence →</button>
+              ` : `
+                <span style="font-size:0.85rem;color:#4ade80;font-weight:600;">✓ Full confession & evidence breakdown unlocked below.</span>
+              `}
+            </div>
+          </div>
+
+          ${step >= 2 ? `
+            <div class="panel-card" style="padding:1.2rem;">
+              <h3 style="color:var(--gold-light);font-size:1.1rem;margin-bottom:0.75rem;">Complete Case Breakdown & Red Herrings</h3>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0.9rem;font-size:0.86rem;">
+                <div class="panel-card" style="padding:0.9rem;background:var(--bg-navy);">
+                  <h4 style="color:var(--gold);margin-bottom:0.35rem;">Motive & Method</h4>
+                  <p>${escapeHtml(STORY_BIBLE.motiveSummary)} ${escapeHtml(STORY_BIBLE.methodSummary)}</p>
+                </div>
+                <div class="panel-card" style="padding:0.9rem;background:var(--bg-navy);">
+                  <h4 style="color:var(--gold);margin-bottom:0.35rem;">Twist Within the Twist</h4>
+                  <p>${escapeHtml(STORY_BIBLE.twistWithinTwist)}</p>
+                </div>
+                <div class="panel-card" style="padding:0.9rem;background:var(--bg-navy);">
+                  <h4 style="color:var(--gold);margin-bottom:0.35rem;">Red Herrings & False Trail</h4>
+                  <p>Riya's mural argument & brass key, Meera's botany experiments, Kavya's essay citations, and the doctored photo framing Nandini were distractions—not the murder plot.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-card" style="padding:1.2rem;">
+              <h3 style="color:var(--gold-light);font-size:1.1rem;margin-bottom:0.75rem;">Epilogue — All Eight Girls of St. Jude Hillcrest</h3>
+              <div class="suspects-grid">
+                ${CHARACTERS.map(c => {
+                  const epilogueText = c.isGuilty
+                    ? "Faces full academy and board accountability for tampering with records and causing Ms. Eleanor's death, while the scholarship audit is restored transparently."
+                    : `Honored for helping piece together the truth after the shock; ${c.name.split(" ")[0]} moves forward into the Autumn Cultural Festival with her secret no longer a weapon against her.`;
+                  return `
+                    <div class="suspect-card">
+                      <div class="suspect-header">
+                        ${renderPortraitSVG(c.id)}
+                        <div>
+                          <div style="font-weight:700;font-size:0.88rem;color:var(--gold-light);">${escapeHtml(c.name)}</div>
+                          <div style="font-size:0.72rem;color:${c.isGuilty ? "#fca5a5" : "#86efac"};">${c.isGuilty ? "Exposed Culprit" : "Cleared Friend"}</div>
+                        </div>
+                      </div>
+                      <p style="font-size:0.8rem;color:var(--text-muted);">${escapeHtml(epilogueText)}</p>
+                    </div>
+                  `;
+                }).join("")}
+              </div>
+            </div>
+
+            <div class="certificate-box printable-cert">
+              <div style="font-size:0.78rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);">St. Jude Hillcrest Academy • Mystery Archive</div>
+              <h3 style="font-size:1.65rem;color:var(--gold-light);margin-top:0.35rem;">Certificate of Detective Achievement</h3>
+              <p style="margin-top:0.65rem;font-size:0.95rem;">Awarded to</p>
+              <div style="font-family:var(--font-display);font-size:1.5rem;font-weight:800;color:#fff;margin:0.25rem 0;">${escapeHtml(state.playerName)}</div>
+              <p style="font-size:0.9rem;color:var(--gold);">Rank: <strong>${escapeHtml(rank)}</strong></p>
+              <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:1.2rem;margin-top:1rem;font-size:0.86rem;">
+                <span>Final Score: <strong>${finalScore}</strong></span>
+                <span>Clues Found: <strong>${state.evidenceIds.length}/${EVIDENCE_CATALOG.length}</strong></span>
+                <span>Hints Used: <strong>${state.hintsUsed}</strong></span>
+                <span>Wrong Accusations: <strong>${state.wrongAccusations}</strong></span>
+              </div>
+              <div style="margin-top:1.35rem;display:flex;flex-wrap:wrap;justify-content:center;gap:0.65rem;">
+                <button class="btn-gold" id="l8-print-btn">Print / Save Certificate</button>
+                <button class="btn-secondary" id="l8-replay-btn">Play Again</button>
+              </div>
+            </div>
+          ` : ""}
+        </div>
+      `;
+    }
+
+    function bindLevel8() {
+      document.getElementById("l8-next-confrontation")?.addEventListener("click", () => {
+        state.l8.confrontationStep = Math.min(2, state.l8.confrontationStep + 1);
+        SoundEngine.dramaSwell();
+        if (state.l8.confrontationStep === 2 && !state.completedLevels.includes(8)) {
+          state.completedLevels.push(8);
+          state.score += 150;
+        }
+        saveGame(true);
+        renderApp();
+      });
+
+      document.getElementById("l8-print-btn")?.addEventListener("click", () => window.print());
+      document.getElementById("l8-replay-btn")?.addEventListener("click", resetGame);
+    }
+
+    function renderLevelContent(lv) {
+      switch (lv) {
+        case 1: return renderLevel1();
+        case 2: return renderLevel2();
+        case 3: return renderLevel3();
+        case 4: return renderLevel4();
+        case 5: return renderLevel5();
+        case 6: return renderLevel6();
+        case 7: return renderLevel7();
+        case 8: return renderLevel8();
+        default: return renderLevel1();
+      }
+    }
+
+    function bindLevelListeners(lv) {
+      switch (lv) {
+        case 1: bindLevel1(); break;
+        case 2: bindLevel2(); break;
+        case 3: bindLevel3(); break;
+        case 4: bindLevel4(); break;
+        case 5: bindLevel5(); break;
+        case 6: bindLevel6(); break;
+        case 7: bindLevel7(); break;
+        case 8: bindLevel8(); break;
+      }
+    }
+
+    /* =======================================================================
+       8. INITIALIZATION
+       ======================================================================= */
+    window.addEventListener("DOMContentLoaded", () => {
+      renderApp();
+    });
+  </script>
+</body>
+</html>
